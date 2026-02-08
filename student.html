@@ -3,52 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduTrack - Student</title>
+    <title>EduTrack - Student Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .nav-link.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
+        .nav-link.active { background-color: #2563eb; color: white; }
         .tab-section { display: none; }
         .tab-section.active { display: block; }
-        .teacher-card.linked { border-color: #2563eb; background-color: #ffffff; opacity: 1; transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.1); }
-        .teacher-card.not-linked { opacity: 0.6; grayscale: 100%; border-color: transparent; }
+        .lang-btn.active { color: #3b82f6 !important; border-bottom: 2px solid #3b82f6; }
+        .standard-card { background: white; padding: 2rem; border-radius: 35px; border: 2px solid #f1f5f9; display: flex; flex-direction: column; height: 100%; }
+        /* Стиль для выделения своего учителя */
+        .my-teacher-card { border: 2px solid #2563eb !important; background: #eff6ff !important; }
     </style>
 </head>
 <body class="flex min-h-screen">
-    <aside class="w-64 bg-slate-900 text-white flex flex-col p-6 fixed h-full shadow-2xl">
-        <div class="text-2xl font-black mb-10 text-blue-500 italic">EDUTRACK</div>
+
+    <aside class="w-64 bg-slate-900 text-white flex flex-col p-6 fixed h-full z-50">
+        <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter">EDUTRACK</div>
         <nav class="flex-1 space-y-3">
-            <button onclick="tab('hw')" id="nav-hw" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-list-check mr-2"></i> Задания</button>
-            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-chalkboard-user mr-2"></i> Учителя</button>
-            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-user mr-2"></i> Профиль</button>
+            <button onclick="tab('hw')" id="nav-hw" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-book-open mr-2"></i> <span data-i18n="menu-hw">Задания</span>
+            </button>
+            <button onclick="tab('all-st')" id="nav-all-st" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-graduation-cap mr-2"></i> <span data-i18n="menu-st">Ученики</span>
+            </button>
+            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-chalkboard-user mr-2"></i> <span data-i18n="menu-tc">Учителя</span>
+            </button>
+            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-circle-user mr-2"></i> <span data-i18n="menu-pr">Профиль</span>
+            </button>
         </nav>
-        <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors"><i class="fa-solid fa-power-off mr-2"></i> Выйти</button>
+        
+        <div class="flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
+            <button onclick="setLang('RU')" id="lang-RU" class="lang-btn active p-2 text-xs font-bold text-white/50">RU</button>
+            <button onclick="setLang('EN')" id="lang-EN" class="lang-btn p-2 text-xs font-bold text-white/50">EN</button>
+            <button onclick="setLang('AZ')" id="lang-AZ" class="lang-btn p-2 text-xs font-bold text-white/50">AZ</button>
+        </div>
+
+        <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors">
+            <i class="fa-solid fa-power-off mr-2"></i> <span data-i18n="logout">Выйти</span>
+        </button>
     </aside>
 
     <main class="flex-1 ml-64 p-10">
-        <div id="sec-hw" class="tab-section active">
-            <h1 class="text-4xl font-black text-slate-800 mb-10">Мои задания</h1>
-            <div id="hw-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+        <div class="grid grid-cols-3 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-[30px] shadow-sm flex items-center justify-between border-b-4 border-blue-600">
+                <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-st-label">Студентов</p><h3 id="count-st" class="text-3xl font-black">0</h3></div>
+                <i class="fa-solid fa-user-graduate text-blue-600"></i>
+            </div>
+            <div class="bg-white p-6 rounded-[30px] shadow-sm flex items-center justify-between border-b-4 border-slate-900">
+                <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-tc-label">Учителей</p><h3 id="count-tc" class="text-3xl font-black">0</h3></div>
+                <i class="fa-solid fa-apple-whole text-slate-600"></i>
+            </div>
+            <div class="bg-white p-6 rounded-[30px] shadow-sm flex items-center justify-between border-b-4 border-blue-600">
+                <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-my-label">Мои учителя</p><h3 id="count-my" class="text-3xl font-black text-blue-600">0</h3></div>
+                <i class="fa-solid fa-heart text-blue-600"></i>
+            </div>
         </div>
 
-        <div id="sec-tc" class="tab-section">
-            <h1 class="text-4xl font-black text-slate-800 mb-10">Все преподаватели</h1>
-            <p class="text-slate-400 mb-8 font-medium italic">Здесь отображаются все учителя системы. Синим цветом выделены те, кто добавил вас в свой класс.</p>
-            <div id="tc-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        <div id="sec-hw" class="tab-section active">
+            <h2 class="text-2xl font-black mb-6 uppercase italic"><i class="fa-solid fa-star text-yellow-400 mr-2"></i><span data-i18n="hw-active">В работе</span></h2>
+            <div id="hw-active-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"></div>
+            
+            <h2 class="text-2xl font-black mb-6 uppercase italic text-slate-400 border-t pt-8"><i class="fa-solid fa-check-double mr-2"></i><span data-i18n="hw-done">Выполненные</span></h2>
+            <div id="hw-done-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-60"></div>
         </div>
+
+        <div id="sec-all-st" class="tab-section"><div id="st-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div></div>
+        <div id="sec-tc" class="tab-section"><div id="tc-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div></div>
 
         <div id="sec-pr" class="tab-section">
-            <h1 class="text-4xl font-black text-slate-800 mb-10">Профиль</h1>
-            <div class="bg-white p-10 rounded-[40px] shadow-sm max-w-sm border border-slate-100">
-                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center text-3xl font-black mb-6 mx-auto" id="avatar">S</div>
-                <h2 id="u-name" class="text-2xl font-black text-center text-slate-800 italic">---</h2>
-                <p id="u-email" class="text-blue-500 font-bold text-center mb-6">---</p>
-                <div class="pt-6 border-t border-slate-50 text-center">
-                    <span class="text-[10px] text-slate-300 font-black uppercase tracking-widest">Твой ID для учителя</span>
-                    <p id="u-id" class="text-[9px] text-slate-400 font-mono break-all mt-2"></p>
+            <div class="max-w-md mx-auto bg-white p-10 rounded-[40px] shadow-2xl text-center border">
+                <div class="relative w-32 h-32 mx-auto mb-8">
+                    <img id="prof-img" src="https://ui-avatars.com/api/?name=S" class="w-full h-full object-cover rounded-[30px] shadow-lg">
+                    <label class="absolute -bottom-2 -right-2 bg-blue-600 text-white p-3 rounded-xl cursor-pointer"><i class="fa-solid fa-camera"></i><input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="previewImage(this)"></label>
                 </div>
+                <input type="text" id="edit-name" class="w-full p-4 bg-slate-50 rounded-2xl font-bold text-center mb-4 outline-none">
+                <div class="relative mb-4"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400">+994</span><input type="text" id="edit-phone" maxlength="9" placeholder="55 123 45 67" class="w-full p-4 pl-16 bg-slate-50 rounded-2xl font-bold outline-none"></div>
+                <p id="u-email" class="text-blue-500 font-bold mb-6 italic"></p>
+                <button onclick="saveProfile()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase" data-i18n="btn-update">Обновить</button>
             </div>
         </div>
     </main>
@@ -57,75 +94,105 @@
         const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
         let myId = null;
 
+        const i18n = {
+            RU: {
+                "menu-hw": "Задания", "menu-st": "Ученики", "menu-tc": "Учителя", "menu-pr": "Профиль", "logout": "Выйти",
+                "count-st-label": "Студентов", "count-tc-label": "Учителей", "count-my-label": "Мои учителя",
+                "hw-active": "В работе", "hw-done": "Выполненные", "btn-done": "Выполнено", "btn-del": "Удалить из архива",
+                "btn-update": "Обновить", "role-self": "Это вы", "role-my": "Мой учитель", "no-hw": "Нет активных заданий"
+            },
+            EN: {
+                "menu-hw": "Tasks", "menu-st": "Students", "menu-tc": "Teachers", "menu-pr": "Profile", "logout": "Logout",
+                "count-st-label": "Students", "count-tc-label": "Teachers", "count-my-label": "My Teachers",
+                "hw-active": "In Progress", "hw-done": "Completed", "btn-done": "Done", "btn-del": "Delete from archive",
+                "btn-update": "Update", "role-self": "It's you", "role-my": "My Teacher", "no-hw": "No active tasks"
+            },
+            AZ: {
+                "menu-hw": "Tapşırıqlar", "menu-st": "Tələbələr", "menu-tc": "Müəllimlər", "menu-pr": "Profil", "logout": "Çıxış",
+                "count-st-label": "Tələbələr", "count-tc-label": "Müəllimlər", "count-my-label": "Müəllimlərim",
+                "hw-active": "Aktiv", "hw-done": "Bitmiş", "btn-done": "Bitir", "btn-del": "Arxivdən sil",
+                "btn-update": "Yadda saxla", "role-self": "Bu sizsiniz", "role-my": "Müəllimim", "no-hw": "Aktiv tapşırıq yoxdur"
+            }
+        };
+
         async function init() {
             const { data: { user } } = await _supabase.auth.getUser();
             if (!user) { window.location.href="index.html"; return; }
             myId = user.id;
-
             const { data: p } = await _supabase.from('profiles').select('*').eq('id', myId).single();
-            if (p) {
-                document.getElementById('u-name').innerText = p.full_name;
-                document.getElementById('u-email').innerText = p.username;
-                document.getElementById('avatar').innerText = p.full_name[0];
-                document.getElementById('u-id').innerText = myId;
+            if(p) { 
+                document.getElementById('edit-name').value = p.full_name || ""; 
+                document.getElementById('u-email').innerText = p.username || "";
+                document.getElementById('edit-phone').value = p.phone ? p.phone.replace('+994', '') : "";
+                if(p.avatar_url) document.getElementById('prof-img').src = p.avatar_url;
             }
-
-            loadAll();
-            _supabase.channel('sync').on('postgres_changes', { event: '*', schema: 'public' }, () => loadAll()).subscribe();
+            loadData();
         }
 
-        async function loadAll() {
-            if (!myId) return;
-
-            // 1. Получаем список учителей, которые привязали данного студента
-            const { data: links } = await _supabase.from('schedule').select('teacher_id').eq('student_id', myId);
-            const myTeacherIds = links ? links.map(l => l.teacher_id) : [];
-
-            // 2. Получаем вообще ВСЕХ учителей системы
-            const { data: allTeachers } = await _supabase.from('profiles').select('*').eq('role', 'teacher');
+        function setLang(l) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('lang-'+l).classList.add('active');
             
-            const tcList = document.getElementById('tc-list');
-            if (allTeachers) {
-                tcList.innerHTML = allTeachers.map(t => {
-                    const isLinked = myTeacherIds.includes(t.id);
-                    return `
-                        <div class="teacher-card p-8 rounded-[35px] border-2 transition-all duration-500 bg-white ${isLinked ? 'linked' : 'not-linked'}">
-                            <div class="w-12 h-12 ${isLinked ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'} rounded-xl flex items-center justify-center text-xl mb-4 font-black">👨‍🏫</div>
-                            <h4 class="font-black text-slate-800 text-lg">${t.full_name}</h4>
-                            <p class="text-xs text-slate-400 mb-4">${t.username}</p>
-                            ${isLinked 
-                                ? '<span class="bg-blue-600 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Мой учитель</span>' 
-                                : '<span class="bg-slate-100 text-slate-400 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Преподаватель</span>'}
-                        </div>
-                    `;
-                }).join('');
-            }
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = i18n[l][key];
+            });
+            loadData(); // Перерисовываем списки с новым языком
+        }
 
-            // 3. Загружаем задания
-            const { data: hws } = await _supabase.from('homework').select('*').eq('student_id', myId).eq('status', 'active');
-            const hwList = document.getElementById('hw-list');
-            hwList.innerHTML = hws?.map(h => `
+        async function loadData() {
+            const activeLang = document.querySelector('.lang-btn.active').id.split('-')[1];
+            const { data: users } = await _supabase.from('profiles').select('*');
+            const { data: links } = await _supabase.from('schedule').select('teacher_id').eq('student_id', myId);
+            const myTids = links ? links.map(l => l.teacher_id) : [];
+
+            document.getElementById('count-st').innerText = users.filter(u => u.role === 'student').length;
+            document.getElementById('count-tc').innerText = users.filter(u => u.role === 'teacher').length;
+            document.getElementById('count-my').innerText = myTids.length;
+
+            const { data: hws } = await _supabase.from('homework').select('*').eq('student_id', myId);
+            
+            // Активные ДЗ
+            document.getElementById('hw-active-list').innerHTML = hws?.filter(h => h.status === 'active').map(h => `
                 <div class="bg-white p-8 rounded-[35px] border-l-[12px] border-blue-600 shadow-sm">
-                    <h3 class="font-black text-xl mb-2 text-slate-800">${h.title}</h3>
-                    <p class="text-slate-500 mb-6 font-medium">${h.content}</p>
-                    <button onclick="markDone('${h.id}')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-sm tracking-widest">Выполнено</button>
-                </div>
-            `).join('') || "<p class='text-slate-300 font-bold uppercase py-10'>Нет активных заданий</p>";
+                    <h3 class="font-black text-2xl mb-2">${h.title}</h3>
+                    <p class="text-slate-500 mb-6">${h.content}</p>
+                    <button onclick="updateHw('${h.id}', 'done')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs">${i18n[activeLang]['btn-done']}</button>
+                </div>`).join('') || `<p class="text-slate-400 italic">${i18n[activeLang]['no-hw']}</p>`;
+
+            // Выполненные ДЗ
+            document.getElementById('hw-done-list').innerHTML = hws?.filter(h => h.status === 'done').map(h => `
+                <div class="bg-slate-100 p-8 rounded-[35px] border-l-[12px] border-slate-400 shadow-sm">
+                    <h3 class="font-black text-xl mb-2 text-slate-500 line-through">${h.title}</h3>
+                    <button onclick="deleteHw('${h.id}')" class="w-full py-3 bg-red-100 text-red-600 rounded-xl font-black uppercase text-[10px] hover:bg-red-200">${i18n[activeLang]['btn-del']}</button>
+                </div>`).join('') || "";
+
+            const renderCard = (u) => {
+                const isMine = myTids.includes(u.id);
+                const roleText = u.id === myId ? i18n[activeLang]['role-self'] : (isMine ? i18n[activeLang]['role-my'] : (u.role === 'teacher' ? i18n[activeLang]['menu-tc'] : i18n[activeLang]['menu-st']));
+                
+                return `
+                <div class="standard-card ${isMine ? 'my-teacher-card' : ''}">
+                    <div class="w-16 h-16 bg-slate-100 rounded-3xl mb-6 overflow-hidden">
+                        ${u.avatar_url ? `<img src="${u.avatar_url}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-2xl font-black">${u.full_name ? u.full_name[0] : '?'}</div>`}
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xl mb-1">${u.full_name || 'No Name'}</h4>
+                    <p class="text-[10px] text-slate-400 mb-6 font-bold italic">${u.phone || '---'}</p>
+                    <div class="mt-auto px-4 py-3 bg-slate-50 rounded-xl text-[9px] font-black uppercase text-center ${isMine ? 'text-blue-600' : ''}">
+                        ${roleText}
+                    </div>
+                </div>`;
+            };
+
+            document.getElementById('st-list').innerHTML = users.filter(u => u.role === 'student').map(u => renderCard(u)).join('');
+            document.getElementById('tc-list').innerHTML = users.filter(u => u.role === 'teacher').map(u => renderCard(u)).join('');
         }
 
-        async function markDone(id) {
-            await _supabase.from('homework').update({ status: 'done' }).eq('id', id);
-            loadAll();
-        }
-
-        function tab(n) {
-            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-            document.getElementById('sec-'+n).classList.add('active');
-            document.getElementById('nav-'+n).classList.add('active');
-        }
-
+        async function updateHw(id, status) { await _supabase.from('homework').update({ status }).eq('id', id); loadData(); }
+        async function deleteHw(id) { if(confirm("Удалить?")) { await _supabase.from('homework').delete().eq('id', id); loadData(); } }
+        function tab(n) { document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active')); document.getElementById('sec-'+n).classList.add('active'); document.getElementById('nav-'+n).classList.add('active'); }
         async function logout() { await _supabase.auth.signOut(); window.location.href="index.html"; }
+        
         init();
     </script>
 </body>

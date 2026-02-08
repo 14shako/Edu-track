@@ -8,12 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(4px); }
         .modal.active { display: flex; }
+        .lang-btn.active { color: #3b82f6 !important; border-bottom: 2px solid #3b82f6; }
     </style>
 </head>
 <body class="flex min-h-screen">
+
     <aside class="w-64 bg-slate-800 text-white flex flex-col p-6 fixed h-full shadow-xl">
         <div class="text-2xl font-bold mb-10 text-blue-400 tracking-tight">
             <i class="fa-solid fa-graduation-cap mr-2"></i>EDUTRACK
@@ -21,59 +24,92 @@
         <nav class="flex-1 space-y-2">
             <a href="#" class="block p-3 bg-blue-600 rounded-xl font-medium"><i class="fa-solid fa-gauge-high mr-2"></i> Панель управления</a>
         </nav>
-        <button onclick="logout()" class="p-3 text-red-400 hover:bg-slate-700 rounded-xl text-left transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Выйти</button>
+
+        <div class="flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
+            <button onclick="setLang('RU')" id="l-RU" class="lang-btn active p-2 text-xs font-bold text-white/50 hover:text-white">RU</button>
+            <button onclick="setLang('EN')" id="l-EN" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">EN</button>
+            <button onclick="setLang('AZ')" id="l-AZ" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">AZ</button>
+        </div>
+
+        <button onclick="logout()" class="p-3 text-red-400 hover:bg-slate-700 rounded-xl text-left transition">
+            <i class="fa-solid fa-right-from-bracket mr-2"></i> Выйти
+        </button>
     </aside>
 
     <main class="flex-1 ml-64 p-8">
         <div class="flex justify-between items-center mb-10">
             <h1 class="text-3xl font-bold text-slate-800">Администрирование</h1>
             <div class="flex gap-3">
-                <button onclick="openLinkModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition"><i class="fa-solid fa-link mr-2"></i> Связать</button>
-                <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition"><i class="fa-solid fa-plus mr-2"></i> Создать аккаунт</button>
+                <button onclick="openLinkModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">
+                    <i class="fa-solid fa-link mr-2"></i> Связать
+                </button>
+                <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition">
+                    <i class="fa-solid fa-plus mr-2"></i> Создать аккаунт
+                </button>
             </div>
         </div>
 
         <div class="bg-white rounded-3xl shadow-sm border overflow-hidden mb-10">
+            <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                <span class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Пользователи системы</span>
+            </div>
             <table class="w-full text-left">
                 <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-                    <tr><th class="p-4">Имя Фамилия</th><th class="p-4">Email</th><th class="p-4">Статус</th><th class="p-4 text-right">Действие</th></tr>
+                    <tr>
+                        <th class="p-4 font-bold">Имя Фамилия</th>
+                        <th class="p-4 font-bold">Email</th>
+                        <th class="p-4 font-bold">Статус</th>
+                        <th class="p-4 text-right font-bold">Действие</th>
+                    </tr>
                 </thead>
                 <tbody id="user-list" class="divide-y text-sm"></tbody>
             </table>
         </div>
 
         <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
-            <div class="p-4 bg-indigo-50 font-bold text-indigo-700 border-b text-[10px] uppercase tracking-widest">Учебные связи</div>
+            <div class="p-4 bg-indigo-50 font-bold text-indigo-700 border-b text-[10px] uppercase tracking-widest">Учебные связи (Учитель → Студент)</div>
             <table class="w-full text-left">
                 <tbody id="schedule-list" class="divide-y text-xs"></tbody>
             </table>
         </div>
     </main>
 
-    <div id="userModal" class="modal"><div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-6 text-slate-800">Регистрация</h2>
-        <div class="space-y-4">
-            <input type="text" id="reg_name" placeholder="Имя Фамилия" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
-            <input type="email" id="reg_email" placeholder="Email" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
-            <input type="text" id="reg_pass" placeholder="Пароль" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
-            <select id="reg_role" class="w-full p-3 bg-slate-50 border rounded-xl outline-none"><option value="student">Студент</option><option value="teacher">Учитель</option></select>
-            <button onclick="createUser()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold mt-4 shadow-lg">Создать</button>
-            <button onclick="closeModal()" class="w-full text-slate-400 text-sm mt-2 text-center block">Отмена</button>
+    <div id="userModal" class="modal">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">Регистрация</h2>
+            <div class="space-y-4">
+                <input type="text" id="reg_name" placeholder="Имя Фамилия" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:border-blue-500 transition">
+                <input type="email" id="reg_email" placeholder="Email" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:border-blue-500 transition">
+                <input type="password" id="reg_pass" placeholder="Пароль" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:border-blue-500 transition">
+                <select id="reg_role" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                    <option value="student">Студент</option>
+                    <option value="teacher">Учитель</option>
+                </select>
+                <button onclick="createUser()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold mt-4 shadow-lg hover:bg-blue-700 transition">Создать</button>
+                <button onclick="closeModal()" class="w-full text-slate-400 text-sm mt-2 text-center block">Отмена</button>
+            </div>
         </div>
-    </div></div>
+    </div>
 
-    <div id="linkModal" class="modal"><div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-6 text-indigo-600">Создать связь</h2>
-        <div class="space-y-4">
-            <select id="select_teacher" class="w-full p-3 bg-slate-50 border rounded-xl"></select>
-            <select id="select_student" class="w-full p-3 bg-slate-50 border rounded-xl"></select>
-            <button onclick="createLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg">Подтвердить</button>
-            <button onclick="closeLinkModal()" class="w-full text-slate-400 text-sm mt-2 text-center block">Отмена</button>
+    <div id="linkModal" class="modal">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 text-indigo-600">Создать связь</h2>
+            <div class="space-y-4">
+                <label class="text-[10px] font-bold uppercase text-slate-400">Выберите учителя</label>
+                <select id="select_teacher" class="w-full p-3 bg-slate-50 border rounded-xl outline-none"></select>
+                
+                <label class="text-[10px] font-bold uppercase text-slate-400">Выберите ученика</label>
+                <select id="select_student" class="w-full p-3 bg-slate-50 border rounded-xl outline-none"></select>
+                
+                <button onclick="createLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">Подтвердить связь</button>
+                <button onclick="closeLinkModal()" class="w-full text-slate-400 text-sm mt-2 text-center block">Отмена</button>
+            </div>
         </div>
-    </div></div>
+    </div>
 
     <script>
         const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
+        
         let usersArr = [];
 
         async function loadData() {
@@ -81,11 +117,19 @@
             if (data) {
                 usersArr = data;
                 document.getElementById('user-list').innerHTML = data.map(u => `
-                    <tr>
-                        <td class="p-4 font-bold text-slate-700">${u.full_name}</td>
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-bold text-slate-700">${u.full_name || 'Без имени'}</td>
                         <td class="p-4 text-slate-400 text-xs">${u.username}</td>
-                        <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${u.role==='teacher'?'bg-indigo-100 text-indigo-600':'bg-blue-100 text-blue-600'}">${u.role}</span></td>
-                        <td class="p-4 text-right"><button onclick="deleteUser('${u.id}')" class="text-red-300 hover:text-red-600 transition px-2"><i class="fa-solid fa-trash-can"></i></button></td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${u.role==='teacher'?'bg-indigo-100 text-indigo-600':'bg-blue-100 text-blue-600'}">
+                                ${u.role}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <button onclick="deleteUser('${u.id}')" class="text-red-300 hover:text-red-600 transition px-2">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
             }
@@ -93,46 +137,100 @@
         }
 
         async function loadSchedule() {
-            const { data } = await _supabase.from('schedule').select('id, teacher:teacher_id(full_name), student:student_id(full_name)');
+            // Исправленный запрос с Join для получения имен
+            const { data } = await _supabase.from('schedule').select(`
+                id,
+                teacher:teacher_id (full_name),
+                student:student_id (full_name)
+            `);
+            
             if (data) {
                 document.getElementById('schedule-list').innerHTML = data.map(s => `
-                    <tr>
-                        <td class="p-4 text-slate-600">Преподаватель <b class="text-indigo-600">${s.teacher?.full_name}</b> ведет ученика <b class="text-blue-600">${s.student?.full_name}</b></td>
-                        <td class="p-4 text-right"><button onclick="unlink('${s.id}')" class="text-red-400 font-bold hover:text-red-600">РАЗВЯЗАТЬ</button></td>
+                    <tr class="hover:bg-indigo-50/30 transition">
+                        <td class="p-4 text-slate-600">
+                            Преподаватель <b class="text-indigo-600">${s.teacher?.full_name || '???'}</b> 
+                            <i class="fa-solid fa-arrow-right mx-2 opacity-30"></i> 
+                            ученик <b class="text-blue-600">${s.student?.full_name || '???'}</b>
+                        </td>
+                        <td class="p-4 text-right">
+                            <button onclick="unlink('${s.id}')" class="text-red-400 text-[10px] font-black uppercase hover:text-red-600 tracking-tighter">Развязать</button>
+                        </td>
                     </tr>
                 `).join('');
             }
         }
 
-        async function deleteUser(id) {
-            if (!confirm("Удалить пользователя навсегда?")) return;
-            await _supabase.from('schedule').delete().or(`teacher_id.eq.${id},student_id.eq.${id}`);
-            await _supabase.from('homework').delete().or(`teacher_id.eq.${id},student_id.eq.${id}`);
-            const { error } = await _supabase.from('profiles').delete().eq('id', id);
-            if (!error) loadData();
+        function setLang(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('l-' + lang).classList.add('active');
         }
 
-        async function unlink(id) { await _supabase.from('schedule').delete().eq('id', id); loadSchedule(); }
-        async function createLink() {
-            await _supabase.from('schedule').insert([{ teacher_id: document.getElementById('select_teacher').value, student_id: document.getElementById('select_student').value }]);
-            closeLinkModal(); loadData();
+        async function deleteUser(id) {
+            if (!confirm("Удалить пользователя?")) return;
+            await _supabase.from('profiles').delete().eq('id', id);
+            loadData();
         }
-        async function createUser() {
-            const { data, error } = await _supabase.auth.signUp({ email: document.getElementById('reg_email').value, password: document.getElementById('reg_pass').value });
-            if (!error) {
-                await _supabase.from('profiles').insert([{ id: data.user.id, full_name: document.getElementById('reg_name').value, role: document.getElementById('reg_role').value, username: document.getElementById('reg_email').value }]);
-                closeModal(); loadData();
+
+        async function unlink(id) {
+            if (confirm("Разорвать связь?")) {
+                await _supabase.from('schedule').delete().eq('id', id);
+                loadSchedule();
             }
         }
-        function openModal() { document.getElementById('userModal').classList.add('active'); }
-        function closeModal() { document.getElementById('userModal').classList.remove('active'); }
+
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОЗДАНИЯ СВЯЗИ
+        async function createLink() {
+            const tId = document.getElementById('select_teacher').value;
+            const sId = document.getElementById('select_student').value;
+            
+            if(!tId || !sId) return alert("Выберите учителя и ученика");
+            
+            const { error } = await _supabase.from('schedule').insert([{ 
+                teacher_id: tId, 
+                student_id: sId 
+            }]);
+            
+            if(error) {
+                alert("Ошибка: " + error.message);
+            } else {
+                closeLinkModal();
+                loadSchedule();
+            }
+        }
+
         function openLinkModal() { 
-            document.getElementById('select_teacher').innerHTML = usersArr.filter(u => u.role === 'teacher').map(u => `<option value="${u.id}">${u.full_name}</option>`).join('');
-            document.getElementById('select_student').innerHTML = usersArr.filter(u => u.role === 'student').map(u => `<option value="${u.id}">${u.full_name}</option>`).join('');
+            // Заполнение выпадающих списков актуальными данными
+            const teachers = usersArr.filter(u => u.role === 'teacher');
+            const students = usersArr.filter(u => u.role === 'student');
+            
+            document.getElementById('select_teacher').innerHTML = teachers.map(u => `<option value="${u.id}">${u.full_name}</option>`).join('');
+            document.getElementById('select_student').innerHTML = students.map(u => `<option value="${u.id}">${u.full_name}</option>`).join('');
+            
             document.getElementById('linkModal').classList.add('active'); 
         }
+
         function closeLinkModal() { document.getElementById('linkModal').classList.remove('active'); }
+        function openModal() { document.getElementById('userModal').classList.add('active'); }
+        function closeModal() { document.getElementById('userModal').classList.remove('active'); }
+
+        async function createUser() {
+            const email = document.getElementById('reg_email').value;
+            const pass = document.getElementById('reg_pass').value;
+            const name = document.getElementById('reg_name').value;
+            const role = document.getElementById('reg_role').value;
+            
+            const { data, error } = await _supabase.auth.signUp({ email, password: pass });
+            if (!error) {
+                await _supabase.from('profiles').insert([{ id: data.user.id, full_name: name, role: role, username: email }]);
+                closeModal();
+                loadData();
+            } else {
+                alert(error.message);
+            }
+        }
+
         async function logout() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
+
         loadData();
     </script>
 </body>
