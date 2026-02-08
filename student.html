@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack - Student</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .nav-link.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+        .teacher-card.linked { border-color: #2563eb; background-color: #ffffff; opacity: 1; transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.1); }
+        .teacher-card.not-linked { opacity: 0.6; grayscale: 100%; border-color: transparent; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+    <aside class="w-64 bg-slate-900 text-white flex flex-col p-6 fixed h-full shadow-2xl">
+        <div class="text-2xl font-black mb-10 text-blue-500 italic">EDUTRACK</div>
+        <nav class="flex-1 space-y-3">
+            <button onclick="tab('hw')" id="nav-hw" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-list-check mr-2"></i> Задания</button>
+            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-chalkboard-user mr-2"></i> Учителя</button>
+            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-user mr-2"></i> Профиль</button>
+        </nav>
+        <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors"><i class="fa-solid fa-power-off mr-2"></i> Выйти</button>
+    </aside>
+
+    <main class="flex-1 ml-64 p-10">
+        <div id="sec-hw" class="tab-section active">
+            <h1 class="text-4xl font-black text-slate-800 mb-10">Мои задания</h1>
+            <div id="hw-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+        </div>
+
+        <div id="sec-tc" class="tab-section">
+            <h1 class="text-4xl font-black text-slate-800 mb-10">Все преподаватели</h1>
+            <p class="text-slate-400 mb-8 font-medium italic">Здесь отображаются все учителя системы. Синим цветом выделены те, кто добавил вас в свой класс.</p>
+            <div id="tc-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+
+        <div id="sec-pr" class="tab-section">
+            <h1 class="text-4xl font-black text-slate-800 mb-10">Профиль</h1>
+            <div class="bg-white p-10 rounded-[40px] shadow-sm max-w-sm border border-slate-100">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center text-3xl font-black mb-6 mx-auto" id="avatar">S</div>
+                <h2 id="u-name" class="text-2xl font-black text-center text-slate-800 italic">---</h2>
+                <p id="u-email" class="text-blue-500 font-bold text-center mb-6">---</p>
+                <div class="pt-6 border-t border-slate-50 text-center">
+                    <span class="text-[10px] text-slate-300 font-black uppercase tracking-widest">Твой ID для учителя</span>
+                    <p id="u-id" class="text-[9px] text-slate-400 font-mono break-all mt-2"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
+        let myId = null;
+
+        async function init() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { window.location.href="index.html"; return; }
+            myId = user.id;
+
+            const { data: p } = await _supabase.from('profiles').select('*').eq('id', myId).single();
+            if (p) {
+                document.getElementById('u-name').innerText = p.full_name;
+                document.getElementById('u-email').innerText = p.username;
+                document.getElementById('avatar').innerText = p.full_name[0];
+                document.getElementById('u-id').innerText = myId;
+            }
+
+            loadAll();
+            _supabase.channel('sync').on('postgres_changes', { event: '*', schema: 'public' }, () => loadAll()).subscribe();
+        }
+
+        async function loadAll() {
+            if (!myId) return;
+
+            // 1. Получаем список учителей, которые привязали данного студента
+            const { data: links } = await _supabase.from('schedule').select('teacher_id').eq('student_id', myId);
+            const myTeacherIds = links ? links.map(l => l.teacher_id) : [];
+
+            // 2. Получаем вообще ВСЕХ учителей системы
+            const { data: allTeachers } = await _supabase.from('profiles').select('*').eq('role', 'teacher');
+            
+            const tcList = document.getElementById('tc-list');
+            if (allTeachers) {
+                tcList.innerHTML = allTeachers.map(t => {
+                    const isLinked = myTeacherIds.includes(t.id);
+                    return `
+                        <div class="teacher-card p-8 rounded-[35px] border-2 transition-all duration-500 bg-white ${isLinked ? 'linked' : 'not-linked'}">
+                            <div class="w-12 h-12 ${isLinked ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'} rounded-xl flex items-center justify-center text-xl mb-4 font-black">👨‍🏫</div>
+                            <h4 class="font-black text-slate-800 text-lg">${t.full_name}</h4>
+                            <p class="text-xs text-slate-400 mb-4">${t.username}</p>
+                            ${isLinked 
+                                ? '<span class="bg-blue-600 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Мой учитель</span>' 
+                                : '<span class="bg-slate-100 text-slate-400 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Преподаватель</span>'}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // 3. Загружаем задания
+            const { data: hws } = await _supabase.from('homework').select('*').eq('student_id', myId).eq('status', 'active');
+            const hwList = document.getElementById('hw-list');
+            hwList.innerHTML = hws?.map(h => `
+                <div class="bg-white p-8 rounded-[35px] border-l-[12px] border-blue-600 shadow-sm">
+                    <h3 class="font-black text-xl mb-2 text-slate-800">${h.title}</h3>
+                    <p class="text-slate-500 mb-6 font-medium">${h.content}</p>
+                    <button onclick="markDone('${h.id}')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-sm tracking-widest">Выполнено</button>
+                </div>
+            `).join('') || "<p class='text-slate-300 font-bold uppercase py-10'>Нет активных заданий</p>";
+        }
+
+        async function markDone(id) {
+            await _supabase.from('homework').update({ status: 'done' }).eq('id', id);
+            loadAll();
+        }
+
+        function tab(n) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-'+n).classList.add('active');
+            document.getElementById('nav-'+n).classList.add('active');
+        }
+
+        async function logout() { await _supabase.auth.signOut(); window.location.href="index.html"; }
+        init();
+    </script>
+</body>
+</html>

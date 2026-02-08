@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack - Кабинет Учителя</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <aside class="w-64 bg-slate-900 text-white flex flex-col p-6 fixed h-full shadow-2xl">
+        <div class="text-2xl font-black mb-10 text-blue-500 tracking-tighter italic">EDUTRACK</div>
+        <nav class="flex-1 space-y-2">
+            <div class="p-3 bg-blue-600 rounded-2xl font-bold shadow-lg shadow-blue-900/20">
+                <i class="fa-solid fa-users mr-2"></i> Мои ученики
+            </div>
+        </nav>
+        <button onclick="logout()" class="p-3 text-red-400 hover:bg-red-500/10 rounded-xl text-left transition font-bold mt-auto">
+            <i class="fa-solid fa-power-off mr-2"></i> Выйти
+        </button>
+    </aside>
+
+    <main class="flex-1 ml-64 p-10">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 id="teacher-display-name" class="text-4xl font-black text-slate-800 tracking-tight">Кабинет учителя</h1>
+                <p id="debug-tid" class="text-[10px] text-slate-400 font-mono mt-2 uppercase tracking-widest"></p>
+            </div>
+            <button onclick="openAddModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl hover:bg-blue-700 transition-all">
+                Привязать ученика
+            </button>
+        </header>
+
+        <div id="no-data-alert" class="hidden bg-amber-50 border-2 border-amber-200 p-8 rounded-[35px] mb-10">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="text-amber-900 font-black text-lg">Список пуст</h3>
+                    <p class="text-amber-700 font-medium">В базе не найдено учеников, привязанных к вашему ID. Нажмите кнопку выше, чтобы добавить ученика.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="my-students-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </main>
+
+    <div id="addModal" class="modal">
+        <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-black mb-6 text-slate-800 text-center">Привязать ученика</h2>
+            <p class="text-slate-400 text-sm mb-4 text-center">Выберите студента из списка зарегистрированных</p>
+            <select id="student-picker" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mb-8 outline-none font-bold text-slate-700 focus:border-blue-500 transition-all"></select>
+            <button onclick="performLink()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-blue-700 transition-all">Подтвердить</button>
+            <button onclick="closeModal('addModal')" class="w-full text-slate-400 font-bold mt-4 hover:text-slate-600">Отмена</button>
+        </div>
+    </div>
+
+    <div id="hwModal" class="modal">
+        <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-t-[10px] border-blue-600">
+            <h2 id="hw-student-name" class="text-2xl font-black mb-6 text-slate-800 italic">Задание</h2>
+            <input type="hidden" id="hw-sid">
+            <div class="space-y-4">
+                <input type="text" id="hw-title" placeholder="Тема задания (например: Тема 1)" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-blue-500/20">
+                <input type="date" id="hw-deadline" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                <textarea id="hw-body" rows="4" placeholder="Что нужно сделать?" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-blue-500/20"></textarea>
+                <button onclick="performHw()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-blue-600 transition-all uppercase tracking-widest">Отправить ученику</button>
+                <button onclick="closeModal('hwModal')" class="w-full text-slate-400 font-bold mt-2">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Supabase
+        const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
+        let tid = null;
+
+        // Запуск при загрузке страницы
+        async function init() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { window.location.href="index.html"; return; }
+            
+            tid = user.id;
+            document.getElementById('debug-tid').innerText = "UID: " + tid;
+
+            // Загружаем имя учителя
+            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', tid).single();
+            if (profile) document.getElementById('teacher-display-name').innerText = profile.full_name;
+            
+            loadStudents();
+        }
+
+        // Загрузка списка привязанных учеников
+        async function loadStudents() {
+            const grid = document.getElementById('my-students-grid');
+            const alertBox = document.getElementById('no-data-alert');
+
+            // 1. Получаем связи из таблицы schedule
+            const { data: links, error: lErr } = await _supabase
+                .from('schedule')
+                .select('*')
+                .eq('teacher_id', tid);
+            
+            if (lErr) { console.error("Ошибка загрузки связей:", lErr); return; }
+
+            // Если связей нет — показываем плашку
+            if (!links || links.length === 0) {
+                alertBox.classList.remove('hidden');
+                grid.innerHTML = "";
+                return;
+            }
+
+            alertBox.classList.add('hidden');
+
+            // 2. Получаем профили учеников по их ID
+            const studentIds = links.map(l => l.student_id);
+            const { data: students, error: sErr } = await _supabase
+                .from('profiles')
+                .select('*')
+                .in('id', studentIds);
+
+            if (sErr) { console.error("Ошибка загрузки профилей:", sErr); return; }
+
+            // 3. Отрисовка карточек
+            grid.innerHTML = students.map(s => `
+                <div class="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm relative group hover:shadow-2xl transition-all duration-300">
+                    <button onclick="unlink('${s.id}')" class="absolute top-6 right-6 text-slate-200 hover:text-red-500 transition-colors" title="Отвязать ученика">
+                        <i class="fa-solid fa-circle-xmark fa-2xl"></i>
+                    </button>
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center text-3xl mb-6 font-black ring-4 ring-white shadow-sm">
+                        ${s.full_name ? s.full_name[0] : 'U'}
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xl mb-1">${s.full_name || 'Без имени'}</h4>
+                    <p class="text-slate-400 text-sm mb-8 font-medium italic underline decoration-slate-100">${s.username}</p>
+                    <button onclick="openHw('${s.id}', '${s.full_name}')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-blue-600 transition-all shadow-lg active:scale-95 uppercase tracking-widest">
+                        Назначить ДЗ
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Привязка нового ученика
+        async function performLink() {
+            const sid = document.getElementById('student-picker').value;
+            if(!sid) return;
+
+            const { error } = await _supabase
+                .from('schedule')
+                .insert([{ teacher_id: tid, student_id: sid }]);
+            
+            if (error) {
+                alert("Ошибка привязки: " + error.message);
+            } else {
+                alert("Ученик успешно привязан!");
+                closeModal('addModal');
+                loadStudents();
+            }
+        }
+
+        // Отвязка ученика
+        async function unlink(sid) {
+            if (confirm("Вы действительно хотите отвязать этого ученика?")) {
+                const { error } = await _supabase
+                    .from('schedule')
+                    .delete()
+                    .eq('teacher_id', tid)
+                    .eq('student_id', sid);
+
+                if (error) {
+                    alert("Ошибка при удалении: " + error.message);
+                } else {
+                    alert("Ученик отвязан.");
+                    loadStudents();
+                }
+            }
+        }
+
+        // Открытие модалки привязки и загрузка всех студентов
+        async function openAddModal() {
+            const { data: students, error } = await _supabase
+                .from('profiles')
+                .select('id, full_name')
+                .eq('role', 'student');
+
+            if (error) {
+                alert("Не удалось загрузить список студентов");
+                return;
+            }
+
+            const picker = document.getElementById('student-picker');
+            picker.innerHTML = students.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        // Работа с ДЗ
+        function openHw(id, name) {
+            document.getElementById('hw-sid').value = id;
+            document.getElementById('hw-student-name').innerText = "Задание для: " + name;
+            document.getElementById('hwModal').classList.add('active');
+        }
+
+        async function performHw() {
+            const sid = document.getElementById('hw-sid').value;
+            const title = document.getElementById('hw-title').value;
+            const content = document.getElementById('hw-body').value;
+            const deadline = document.getElementById('hw-deadline').value;
+
+            if(!title || !content) { alert("Заполните тему и содержание задания!"); return; }
+
+            const { error } = await _supabase.from('homework').insert([{ 
+                teacher_id: tid, 
+                student_id: sid,
+                title: title, 
+                content: content,
+                deadline: deadline, 
+                status: 'active'
+            }]);
+
+            if (error) {
+                alert("Ошибка при отправке задания: " + error.message);
+            } else {
+                alert("Домашнее задание успешно отправлено!");
+                closeModal('hwModal');
+                // Очистка полей
+                document.getElementById('hw-title').value = "";
+                document.getElementById('hw-body').value = "";
+            }
+        }
+
+        // Вспомогательные функции
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        async function logout() { await _supabase.auth.signOut(); window.location.href="index.html"; }
+
+        // Запуск системы
+        init();
+    </script>
+</body>
+</html>

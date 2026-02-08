@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack - Вход в систему</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="glass-card w-full max-w-md p-10 rounded-[40px] shadow-2xl">
+        <div class="text-center mb-10">
+            <div class="text-4xl font-black text-blue-600 tracking-tighter italic mb-2">EDUTRACK</div>
+            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Система управления обучением</p>
+        </div>
+
+        <div id="login-form" class="space-y-5">
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Электронная почта</label>
+                <input type="email" id="email" placeholder="name@example.com" 
+                    class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
+                <input type="password" id="password" placeholder="••••••••" 
+                    class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+
+            <button onclick="handleLogin()" id="login-btn" 
+                class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-blue-600 transition-all transform active:scale-95 uppercase tracking-widest text-sm">
+                Войти в кабинет
+            </button>
+
+            <div class="text-center mt-6">
+                <p class="text-slate-400 text-sm font-medium">Нет аккаунта? <a href="#" class="text-blue-600 font-black">Свяжитесь с админом</a></p>
+            </div>
+        </div>
+
+        <div id="loader" class="hidden text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+            <p class="text-slate-500 font-bold mt-2 italic">Проверка профиля...</p>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Supabase
+        const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
+
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('login-btn');
+            const loader = document.getElementById('loader');
+            const form = document.getElementById('login-form');
+
+            if (!email || !password) {
+                alert("Пожалуйста, заполните все поля");
+                return;
+            }
+
+            // Показываем загрузку
+            btn.disabled = true;
+            form.classList.add('opacity-50');
+            loader.classList.remove('hidden');
+
+            try {
+                // 1. Авторизация в Supabase Auth
+                const { data: authData, error: authError } = await _supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (authError) throw authError;
+
+                const user = authData.user;
+
+                // 2. Получаем роль пользователя из таблицы profiles
+                const { data: profile, error: profileError } = await _supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError) throw profileError;
+
+                // 3. Перенаправление на основе роли
+                if (profile.role === 'teacher') {
+                    window.location.href = 'teacher.html';
+                } else if (profile.role === 'student') {
+                    window.location.href = 'student.html';
+                } else {
+                    alert("Ошибка: роль пользователя не определена (" + profile.role + ")");
+                    await _supabase.auth.signOut();
+                    location.reload();
+                }
+
+            } catch (err) {
+                alert("Ошибка входа: " + err.message);
+                btn.disabled = false;
+                form.classList.remove('opacity-50');
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Проверка: если пользователь уже вошел, перекидываем его сразу
+        window.onload = async () => {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                const { data: p } = await _supabase.from('profiles').select('role').eq('id', session.user.id).single();
+                if (p) {
+                    window.location.href = p.role === 'teacher' ? 'teacher.html' : 'student.html';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
