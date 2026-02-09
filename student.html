@@ -3,164 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduTrack - Premium Student Portal</title>
+    <title>EduTrack - Student Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        body { 
-            background-color: #f1f5f9; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #1e293b;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .tab-section.active { display: block; animation: fadeIn 0.4s ease forwards; }
+        .tab-section { display: none; }
 
-        .nav-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .nav-link.active { 
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white; 
-            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); 
-        }
-
-        .tab-section { display: none; animation: fadeIn 0.4s ease-out; }
-        .tab-section.active { display: block; }
-
+        .nav-link.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
+        
         .standard-card { 
             background: white; 
-            padding: 1.75rem; 
-            border-radius: 24px; 
-            border: 1px solid rgba(241, 245, 249, 1);
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            padding: 2rem;
+            border-radius: 35px;
+            border: 2px solid #f1f5f9;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .standard-card:hover { 
+            transform: translateY(-8px); 
+            border-color: #2563eb; 
+            box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.08);
         }
 
-        .standard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        .online-status {
+            position: absolute; top: 2rem; right: 2rem;
+            width: 10px; height: 10px; background: #10b981;
+            border-radius: 50%;
+        }
+        .online-status::after {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: #10b981; border-radius: 50%;
+            animation: pulse 2s infinite; opacity: 0.5;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(3); opacity: 0; }
         }
 
-        .my-teacher-card { 
-            border: 2px solid #3b82f6 !important; 
-            background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%) !important;
-        }
-
-        .avatar-container {
-            width: 64px; height: 64px; border-radius: 18px;
-            background: #f8fafc; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 1.5rem; color: #64748b;
-            margin-bottom: 1.25rem; overflow: hidden; border: 1px solid #f1f5f9;
-        }
-
-        .role-badge {
-            padding: 0.6rem; border-radius: 14px; font-size: 0.75rem;
-            font-weight: 800; text-transform: uppercase; letter-spacing: 0.025em;
-            text-align: center; margin-top: auto; transition: all 0.3s;
-        }
-
-        .input-premium {
-            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px;
-            padding: 1rem; transition: all 0.3s; width: 100%; outline: none;
-        }
-        .input-premium:focus { border-color: #3b82f6; ring: 4px ring-blue-50; background: white; }
-
-        .lang-btn { opacity: 0.4; font-size: 11px; font-weight: 800; transition: 0.3s; }
-        .lang-btn.active { opacity: 1; color: #3b82f6; }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .lang-btn.active { color: #3b82f6 !important; border-bottom: 2px solid #3b82f6; opacity: 1 !important; }
+        
+        aside { backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <aside class="w-72 bg-slate-900 text-white flex flex-col p-8 fixed h-full z-50">
-        <div class="flex items-center gap-3 mb-12">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-bolt text-white"></i>
-            </div>
-            <div class="text-2xl font-extrabold tracking-tight italic">EDUTRACK</div>
+    <aside class="w-64 bg-slate-900/95 text-white flex flex-col p-6 fixed h-full z-50 shadow-2xl">
+        <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs not-italic">ET</div>
+            EDUTRACK
         </div>
-
-        <nav class="flex-1 space-y-2">
-            <button onclick="tab('hw')" id="nav-hw" class="nav-link active w-full text-left px-5 py-4 rounded-2xl font-bold flex items-center gap-3">
-                <i class="fa-solid fa-layer-group"></i> <span data-i18n="nav-hw">Задания</span>
+        <nav class="flex-1 space-y-3">
+            <button onclick="tab('hw')" id="nav-hw" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-book-open mr-2"></i> <span data-i18n="menu-hw">Задания</span>
             </button>
-            <button onclick="tab('st')" id="nav-st" class="nav-link w-full text-left px-5 py-4 rounded-2xl font-bold flex items-center gap-3">
-                <i class="fa-solid fa-user-group"></i> <span data-i18n="nav-st">Ученики</span>
+            <button onclick="tab('st')" id="nav-st" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-graduation-cap mr-2"></i> <span data-i18n="menu-st">Ученики</span>
             </button>
-            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left px-5 py-4 rounded-2xl font-bold flex items-center gap-3">
-                <i class="fa-solid fa-graduation-cap"></i> <span data-i18n="nav-tc">Учителя</span>
+            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-chalkboard-user mr-2"></i> <span data-i18n="menu-tc">Учителя</span>
             </button>
-            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left px-5 py-4 rounded-2xl font-bold flex items-center gap-3">
-                <i class="fa-solid fa-circle-user"></i> <span data-i18n="nav-pr">Профиль</span>
+            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-circle-user mr-2"></i> <span data-i18n="menu-pr">Профиль</span>
             </button>
         </nav>
 
-        <div class="flex gap-4 mb-6 px-2">
-            <button onclick="setLang('RU')" id="lang-RU" class="lang-btn active">RU</button>
-            <button onclick="setLang('EN')" id="lang-EN" class="lang-btn">EN</button>
-            <button onclick="setLang('AZ')" id="lang-AZ" class="lang-btn">AZ</button>
+        <div class="flex gap-1 justify-center mb-6 bg-white/5 p-1 rounded-xl">
+            <button onclick="setLang('RU')" id="lang-RU" class="lang-btn active p-2 text-[10px] font-black text-white/40 hover:text-white transition">RU</button>
+            <button onclick="setLang('AZ')" id="lang-AZ" class="lang-btn p-2 text-[10px] font-black text-white/40 hover:text-white transition">AZ</button>
+            <button onclick="setLang('EN')" id="lang-EN" class="lang-btn p-2 text-[10px] font-black text-white/40 hover:text-white transition">EN</button>
         </div>
 
-        <button onclick="logout()" class="mt-auto flex items-center gap-3 p-4 text-slate-400 hover:text-red-400 transition-colors font-bold">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span data-i18n="logout">Выйти</span>
+        <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:bg-red-500/10 rounded-xl transition-all">
+            <i class="fa-solid fa-power-off mr-2"></i> <span data-i18n="logout">Выйти</span>
         </button>
     </aside>
 
-    <main class="flex-1 ml-72 p-12">
-        <div class="grid grid-cols-3 gap-8 mb-16">
-            <div class="bg-white p-8 rounded-[32px] shadow-sm flex items-center justify-between border border-white">
-                <div><p class="text-sm font-bold text-slate-400 mb-1" data-i18n="stat-st">Студентов</p><h3 id="count-st" class="text-4xl font-extrabold">0</h3></div>
-                <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
-            </div>
-            <div class="bg-white p-8 rounded-[32px] shadow-sm flex items-center justify-between border border-white">
-                <div><p class="text-sm font-bold text-slate-400 mb-1" data-i18n="stat-tc">Учителей</p><h3 id="count-tc" class="text-4xl font-extrabold">0</h3></div>
-                <div class="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-chalkboard-user"></i></div>
-            </div>
-            <div class="bg-white p-8 rounded-[32px] shadow-sm flex items-center justify-between border border-blue-100 ring-4 ring-blue-50/50">
-                <div><p class="text-sm font-bold text-blue-500 mb-1" data-i18n="stat-my">Мои учителя</p><h3 id="count-my" class="text-4xl font-extrabold text-blue-600">0</h3></div>
-                <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-blue-200"><i class="fa-solid fa-star"></i></div>
-            </div>
-        </div>
-
+    <main class="flex-1 ml-64 p-10">
         <div id="sec-hw" class="tab-section active">
-            <h2 class="text-3xl font-extrabold mb-8 flex items-center gap-3">
-                <span class="w-2 h-8 bg-blue-600 rounded-full"></span> <span data-i18n="title-hw">Мои задания</span>
+            <h1 class="text-4xl font-black text-slate-800 mb-10 italic uppercase tracking-tight" data-i18n="menu-hw">Задания</h1>
+            <div id="hw-active-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"></div>
+            <h2 class="text-xl font-bold text-slate-400 mb-6 uppercase tracking-widest border-t pt-10 flex items-center gap-4">
+                <span data-i18n="archive">Архив</span>
+                <div class="h-[1px] bg-slate-200 flex-1"></div>
             </h2>
-            <div id="hw-list" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+            <div id="hw-done-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-60"></div>
         </div>
 
         <div id="sec-st" class="tab-section">
-            <h2 class="text-3xl font-extrabold mb-8" data-i18n="title-st">Сообщество студентов</h2>
+            <h1 class="text-4xl font-black text-slate-800 mb-10 italic uppercase tracking-tight" data-i18n="menu-st">Ученики курса</h1>
             <div id="st-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         <div id="sec-tc" class="tab-section">
-            <h2 class="text-3xl font-extrabold mb-8" data-i18n="title-tc">Преподаватели</h2>
+            <h1 class="text-4xl font-black text-slate-800 mb-10 italic uppercase tracking-tight" data-i18n="menu-tc">Преподаватели</h1>
             <div id="tc-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         <div id="sec-pr" class="tab-section">
-            <div class="max-w-2xl mx-auto bg-white p-12 rounded-[40px] shadow-xl border border-white text-center">
-                <img id="prof-img" src="https://ui-avatars.com/api/?background=random&size=256" class="w-40 h-40 mx-auto rounded-[35px] mb-8 shadow-2xl ring-8 ring-slate-50">
-                
-                <div class="space-y-4 text-left max-w-sm mx-auto mb-8">
-                    <input id="edit-name" class="input-premium" placeholder="Имя Фамилия">
-                    <input id="edit-phone" class="input-premium" placeholder="+994">
-                    <button onclick="saveProfile()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all uppercase text-xs" data-i18n="prof-save">Сохранить</button>
+            <h1 class="text-4xl font-black text-slate-800 mb-10 italic uppercase tracking-tight" data-i18n="menu-pr">Профиль</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div class="standard-card p-10">
+                    <div class="flex items-center gap-6 mb-10">
+                        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-[25px] flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-blue-200" id="prof-initials">?</div>
+                        <div>
+                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1" data-i18n="role-st">Студент</p>
+                            <h3 class="text-2xl font-black text-slate-800" id="display-name">---</h3>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-name">Имя Фамилия</label><input type="text" id="edit-name" class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 focus:bg-white transition-all outline-none text-slate-700"></div>
+                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-phone">Телефон</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400">+994</span><input type="text" id="edit-phone" maxlength="9" class="w-full p-4 pl-16 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div></div>
+                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Zoom Link</label><input type="url" id="edit-zoom" placeholder="https://zoom.us/j/..." class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div>
+                        <button onclick="saveProfile()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95" data-i18n="btn-save">Обновить</button>
+                    </div>
                 </div>
-
-                <div class="bg-slate-50 p-6 rounded-3xl text-left border border-slate-100">
-                    <p class="text-xs font-bold text-slate-400 uppercase mb-2 tracking-widest">ID</p>
-                    <p id="u-id" class="text-sm font-mono text-slate-600 break-all"></p>
+                <div class="standard-card p-10 flex flex-col justify-between overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="field-level">Мой уровень</p>
+                        <div class="text-7xl font-black text-blue-600 mb-10 tracking-tighter" id="u-level">--</div>
+                        <div class="bg-slate-50 p-8 rounded-[35px] border border-slate-100 relative overflow-hidden">
+                            <p class="text-[10px] font-black text-slate-400 uppercase mb-4" data-i18n="field-teacher">Ваш учитель</p>
+                            <div class="flex items-center gap-4"><h4 class="text-2xl font-black text-slate-800" id="u-teacher-name">---</h4></div>
+                            <div class="absolute -right-4 -bottom-4 text-slate-100 text-6xl rotate-12"><i class="fa-solid fa-quote-right"></i></div>
+                        </div>
+                    </div>
+                    <div class="mt-10 pt-8 border-t border-dashed border-slate-200">
+                        <p class="text-[10px] font-black text-slate-300 uppercase mb-1">Email</p>
+                        <p id="u-email" class="font-bold text-slate-400 italic">---</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -171,98 +152,148 @@
         let myId = null;
         let currentLang = 'RU';
 
-        const i18n = {
-            RU: { "nav-hw": "Задания", "nav-st": "Ученики", "nav-tc": "Учителя", "nav-pr": "Профиль", "logout": "Выйти", "stat-st": "Студентов", "stat-tc": "Учителей", "stat-my": "Мои учителя", "title-hw": "Мои задания", "title-st": "Сообщество", "title-tc": "Учителя", "prof-save": "Сохранить", "role-self": "Это вы", "role-my": "Мой учитель", "role-tc": "Учитель", "role-st": "Студент" },
-            EN: { "nav-hw": "Tasks", "nav-st": "Students", "nav-tc": "Teachers", "nav-pr": "Profile", "logout": "Logout", "stat-st": "Students", "stat-tc": "Teachers", "stat-my": "My Teachers", "title-hw": "My Tasks", "title-st": "Community", "title-tc": "Teachers", "prof-save": "Save Changes", "role-self": "It's you", "role-my": "My Teacher", "role-tc": "Teacher", "role-st": "Student" },
-            AZ: { "nav-hw": "Tapşırıqlar", "nav-st": "Tələbələr", "nav-tc": "Müəllimlər", "nav-pr": "Profil", "logout": "Çıxış", "stat-st": "Tələbə", "stat-tc": "Müəllim", "stat-my": "Müəllimlərim", "title-hw": "Tapşırıqlarım", "title-st": "İcma", "title-tc": "Müəllimlər", "prof-save": "Yadda saxla", "role-self": "Siz", "role-my": "Müəllimim", "role-tc": "Müəllim", "role-st": "Tələbə" }
+        const translations = {
+            RU: {
+                "menu-hw": "Задания", "menu-st": "Ученики", "menu-tc": "Учителя", "menu-pr": "Профиль",
+                "logout": "Выйти", "archive": "Архив", "role-st": "Студент", "role-tc": "Учитель", "btn-save": "Обновить",
+                "field-name": "Имя Фамилия", "field-phone": "Телефон", "field-level": "Мой уровень", "field-teacher": "Ваш учитель",
+                "no-phone": "Нет номера", "empty-hw": "Заданий пока нет. Отдыхайте!"
+            },
+            AZ: {
+                "menu-hw": "Tapşırıqlar", "menu-st": "Tələbələr", "menu-tc": "Müəllimlər", "menu-pr": "Profil",
+                "logout": "Çıxış", "archive": "Arxiv", "role-st": "Tələbə", "role-tc": "Müəllim", "btn-save": "Yadda saxla",
+                "field-name": "Ad Soyad", "field-phone": "Telefon", "field-level": "Səviyyəm", "field-teacher": "Müəlliminiz",
+                "no-phone": "Nömrə yoxdur", "empty-hw": "Hələlik tapşırıq yoxdur. İstirahət edin!"
+            },
+            EN: {
+                "menu-hw": "Homework", "menu-st": "Students", "menu-tc": "Teachers", "menu-pr": "Profile",
+                "logout": "Logout", "archive": "Archive", "role-st": "Student", "role-tc": "Teacher", "btn-save": "Update",
+                "field-name": "Full Name", "field-phone": "Phone", "field-level": "My Level", "field-teacher": "Your Teacher",
+                "no-phone": "No phone", "empty-hw": "No tasks yet. Enjoy your time!"
+            }
         };
 
         async function init() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (!user) { window.location.href="index.html"; return; }
-            myId = user.id;
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) { window.location.href="index.html"; return; }
+            myId = session.user.id;
+            _supabase.channel('updates').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => loadData()).subscribe();
+            await loadData();
+        }
 
+        async function loadData() {
             const { data: p } = await _supabase.from('profiles').select('*').eq('id', myId).single();
-            if (p) {
-                document.getElementById('edit-name').value = p.full_name || '';
-                document.getElementById('edit-phone').value = p.phone || '';
-                document.getElementById('u-id').innerText = myId;
-                if(p.avatar_url) document.getElementById('prof-img').src = p.avatar_url;
+            if(p) {
+                document.getElementById('display-name').innerText = p.full_name || "---";
+                document.getElementById('edit-name').value = p.full_name || "";
+                document.getElementById('edit-phone').value = p.phone ? p.phone.replace('+994', '') : "";
+                document.getElementById('edit-zoom').value = p.zoom_link || "";
+                document.getElementById('u-email').innerText = p.username || "";
+                document.getElementById('u-level').innerText = p.level || "A1";
+                document.getElementById('prof-initials').innerText = p.full_name ? p.full_name[0] : "?";
             }
 
+            const { data: link } = await _supabase.from('schedule').select('teacher:teacher_id(full_name)').eq('student_id', myId).maybeSingle();
+            if(link && link.teacher) document.getElementById('u-teacher-name').innerText = link.teacher.full_name;
+
+            const { data: allUsers } = await _supabase.from('profiles').select('*');
+            renderLists(allUsers);
+
+            const { data: hws } = await _supabase.from('homework').select('*').eq('student_id', myId);
+            renderHw(hws);
+        }
+
+        function renderLists(users) {
+            const stList = document.getElementById('st-list');
+            const tcList = document.getElementById('tc-list');
+            const phoneLabel = translations[currentLang]['no-phone'];
+            const roleSt = translations[currentLang]['role-st'];
+            const roleTc = translations[currentLang]['role-tc'];
+
+            const createCard = (u, roleText, isTeacher) => {
+                const subjectBadge = (isTeacher && u.subject) 
+                    ? `<div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl text-[11px] font-black uppercase mb-4 border border-blue-100">
+                        <i class="fa-solid fa-book-open"></i>
+                        ${u.subject}
+                       </div>` 
+                    : '';
+
+                // Скрываем уровень, если это карточка ученика
+                const displayLevel = (isTeacher && u.level) ? `| ${u.level}` : '';
+
+                return `
+                <div class="standard-card group">
+                    <div class="online-status"></div>
+                    <div class="w-16 h-16 ${isTeacher ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'} rounded-3xl mb-6 flex items-center justify-center text-2xl font-black group-hover:scale-110 transition-transform">
+                        ${u.full_name ? u.full_name[0] : '?'}
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xl mb-1">${u.full_name || '...'}</h4>
+                    
+                    ${subjectBadge}
+
+                    <p class="text-blue-600 font-bold text-sm mb-2 italic">${u.phone || phoneLabel}</p>
+                    <p class="text-slate-400 text-[10px] mb-8 font-bold italic truncate">${u.username || ''}</p>
+                    <div class="mt-auto">
+                        <div class="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] text-center uppercase border border-slate-100 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors">
+                            ${roleText} ${displayLevel}
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            stList.innerHTML = users.filter(u => u.role === 'student').map(u => createCard(u, roleSt, false)).join('');
+            tcList.innerHTML = users.filter(u => u.role === 'teacher').map(u => createCard(u, roleTc, true)).join('');
+        }
+
+        function renderHw(hws) {
+            const active = hws?.filter(h => h.status === 'active') || [];
+            if(active.length === 0) {
+                document.getElementById('hw-active-list').innerHTML = `
+                    <div class="col-span-full py-20 text-center">
+                        <i class="fa-solid fa-mug-hot text-5xl text-slate-200 mb-4"></i>
+                        <p class="text-slate-400 font-bold italic">${translations[currentLang]['empty-hw']}</p>
+                    </div>`;
+            } else {
+                document.getElementById('hw-active-list').innerHTML = active.map(h => `
+                    <div class="bg-white p-8 rounded-[35px] border-l-[12px] border-blue-600 shadow-xl transition-all hover:scale-[1.02]">
+                        <h3 class="font-black text-xl mb-2 text-slate-800">${h.title}</h3>
+                        <p class="text-slate-500 mb-6 font-medium">${h.content}</p>
+                        <button onclick="updateStatus('${h.id}', 'done')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 transition-all active:scale-95">Выполнено</button>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('hw-done-list').innerHTML = hws?.filter(h => h.status === 'done').map(h => `
+                <div class="bg-white p-6 rounded-[30px] border border-slate-100 opacity-70"><h3 class="font-bold text-slate-400 line-through">${h.title}</h3></div>
+            `).join('') || "";
+        }
+
+        async function updateStatus(id, status) {
+            await _supabase.from('homework').update({ status }).eq('id', id);
             loadData();
-            _supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public' }, () => loadData()).subscribe();
         }
 
         async function saveProfile() {
-            const { error } = await _supabase.from('profiles').update({ 
+            const phoneVal = document.getElementById('edit-phone').value.replace(/\D/g, '');
+            const phone = phoneVal ? "+994" + phoneVal : null;
+
+            const { error } = await _supabase.from('profiles').update({
                 full_name: document.getElementById('edit-name').value,
-                phone: document.getElementById('edit-phone').value 
+                phone: phone,
+                zoom_link: document.getElementById('edit-zoom').value
             }).eq('id', myId);
-            if(!error) alert("Saved!");
+            if(!error) { alert(currentLang === 'AZ' ? "Məlumat yeniləndi!" : "Данные обновлены!"); loadData(); }
         }
 
         function setLang(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('lang-' + lang).classList.add('active');
-            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n[lang][el.getAttribute('data-i18n')]);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = translations[lang][key];
+            });
             loadData();
-        }
-
-        async function loadData() {
-            const { data: users } = await _supabase.from('profiles').select('*');
-            const { data: links } = await _supabase.from('schedule').select('teacher_id').eq('student_id', myId);
-            const { data: hws } = await _supabase.from('homework').select('*').eq('student_id', myId);
-            
-            const myTids = links ? [...new Set(links.map(l => String(l.teacher_id).toLowerCase()))] : [];
-
-            document.getElementById('count-st').innerText = users ? users.filter(u => u.role === 'student').length : 0;
-            document.getElementById('count-tc').innerText = users ? users.filter(u => u.role === 'teacher').length : 0;
-            document.getElementById('count-my').innerText = myTids.length;
-
-            const renderCard = (u) => {
-                const uId = String(u.id).toLowerCase();
-                const isMine = myTids.includes(uId);
-                const isSelf = uId === String(myId).toLowerCase();
-                
-                let badgeClass = isMine ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-100 text-slate-500';
-                let roleKey = isSelf ? 'role-self' : (isMine ? 'role-my' : (u.role === 'teacher' ? 'role-tc' : 'role-st'));
-
-                return `
-                <div class="standard-card ${isMine ? 'my-teacher-card' : ''}">
-                    <div class="avatar-container">
-                        ${u.avatar_url ? `<img src="${u.avatar_url}" class="w-full h-full object-cover">` : u.full_name[0]}
-                    </div>
-                    <h4 class="font-extrabold text-xl text-slate-800 mb-1">${u.full_name}</h4>
-                    <p class="text-xs text-blue-500 font-bold mb-6">${u.phone || '@user'}</p>
-                    <div class="role-badge ${badgeClass}">${i18n[currentLang][roleKey]}</div>
-                </div>`;
-            };
-
-            if (users) {
-                document.getElementById('st-list').innerHTML = users.filter(u => u.role === 'student').map(u => renderCard(u)).join('');
-                document.getElementById('tc-list').innerHTML = users.filter(u => u.role === 'teacher').map(u => renderCard(u)).join('');
-            }
-
-            if (hws) {
-                document.getElementById('hw-list').innerHTML = hws.map(h => `
-                <div class="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-600"></div>
-                    <h4 class="font-extrabold text-xl text-slate-800 mb-2">${h.title}</h4>
-                    <p class="text-slate-500 mb-8">${h.content}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg">${h.status}</span>
-                        <button onclick="delHw('${h.id}')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition-all">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                </div>`).join('');
-            }
-        }
-
-        async function delHw(id) {
-            if(confirm("Удалить задание?")) { await _supabase.from('homework').delete().eq('id', id); loadData(); }
         }
 
         function tab(n) {
@@ -272,7 +303,13 @@
             document.getElementById('nav-'+n).classList.add('active');
         }
 
-        async function logout() { await _supabase.auth.signOut(); window.location.href="index.html"; }
+        async function logout() { 
+            await _supabase.auth.signOut(); 
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href="index.html"; 
+        }
+
         init();
     </script>
 </body>

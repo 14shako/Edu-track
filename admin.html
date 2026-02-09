@@ -3,235 +3,472 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduTrack - Admin</title>
+    <title>EduTrack Admin Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(4px); }
         .modal.active { display: flex; }
         .lang-btn.active { color: #3b82f6 !important; border-bottom: 2px solid #3b82f6; }
+        .stat-card { transition: transform 0.2s; border: 1px solid #e2e8f0; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; display: inline-block; }
+        .badge-admin { background: #dbeafe; color: #2563eb; }
+        .badge-teacher { background: #f3e8ff; color: #7c3aed; }
+        .badge-student { background: #dcfce7; color: #16a34a; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .nav-link.active { background: #2563eb !important; color: white !important; }
     </style>
 </head>
 <body class="flex min-h-screen">
 
     <aside class="w-64 bg-slate-800 text-white flex flex-col p-6 fixed h-full shadow-xl">
-        <div class="text-2xl font-bold mb-10 text-blue-400 tracking-tight">
+        <div class="text-2xl font-bold mb-10 text-blue-400 tracking-tight italic">
             <i class="fa-solid fa-graduation-cap mr-2"></i>EDUTRACK
         </div>
         <nav class="flex-1 space-y-2">
-            <a href="#" class="block p-3 bg-blue-600 rounded-xl font-medium"><i class="fa-solid fa-gauge-high mr-2"></i> Панель управления</a>
+            <button onclick="showPage('dashboard', this)" class="nav-link w-full text-left p-3 rounded-xl font-medium active transition" data-i18n="nav-dash">
+                <i class="fa-solid fa-gauge-high mr-2"></i> <span>Панель управления</span>
+            </button>
+            <button onclick="showPage('teachers', this)" class="nav-link w-full text-left p-3 hover:bg-slate-700 rounded-xl transition text-slate-300" data-i18n="nav-teachers">
+                <i class="fa-solid fa-chalkboard-user mr-2"></i> <span>Учителя</span>
+            </button>
+            <button onclick="showPage('students', this)" class="nav-link w-full text-left p-3 hover:bg-slate-700 rounded-xl transition text-slate-300" data-i18n="nav-students">
+                <i class="fa-solid fa-user-graduate mr-2"></i> <span>Ученики</span>
+            </button>
+            <button onclick="showPage('attendance', this)" class="nav-link w-full text-left p-3 hover:bg-slate-700 rounded-xl transition text-slate-300" data-i18n="nav-att">
+                <i class="fa-solid fa-calendar-check mr-2"></i> <span>Посещаемость</span>
+            </button>
         </nav>
 
         <div class="flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
-            <button onclick="setLang('RU')" id="l-RU" class="lang-btn active p-2 text-xs font-bold text-white/50 hover:text-white">RU</button>
+            <button onclick="setLang('RU')" id="l-RU" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">RU</button>
             <button onclick="setLang('EN')" id="l-EN" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">EN</button>
             <button onclick="setLang('AZ')" id="l-AZ" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">AZ</button>
         </div>
 
         <button onclick="logout()" class="p-3 text-red-400 hover:bg-slate-700 rounded-xl text-left transition">
-            <i class="fa-solid fa-right-from-bracket mr-2"></i> Выйти
+            <i class="fa-solid fa-right-from-bracket mr-2"></i> <span data-i18n="logout">Выйти</span>
         </button>
     </aside>
 
     <main class="flex-1 ml-64 p-8">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-3xl font-bold text-slate-800">Администрирование</h1>
+        <div class="flex justify-between items-center mb-8">
+            <h1 id="page-title-text" class="text-3xl font-bold text-slate-800" data-i18n="nav-dash">Панель управления</h1>
             <div class="flex gap-3">
                 <button onclick="openLinkModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">
-                    <i class="fa-solid fa-link mr-2"></i> Связать
+                    <i class="fa-solid fa-link mr-2"></i> <span data-i18n="btn-link">Связать</span>
                 </button>
                 <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition">
-                    <i class="fa-solid fa-plus mr-2"></i> Создать аккаунт
+                    <i class="fa-solid fa-plus mr-2"></i> <span data-i18n="btn-create">Создать аккаунт</span>
                 </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-sm border overflow-hidden mb-10">
-            <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-                <span class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Пользователи системы</span>
+        <div id="page-dashboard" class="page-section active">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-10">
+                <div class="stat-card bg-white p-5 rounded-3xl text-center">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold mb-2" data-i18n="stat-all">Всего</div>
+                    <div id="stat-all" class="text-3xl font-black text-slate-800">0</div>
+                </div>
+                <div class="stat-card bg-white p-5 rounded-3xl border-l-4 border-l-indigo-500">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold mb-2" data-i18n="stat-teachers">Учителя</div>
+                    <div id="stat-teachers" class="text-3xl font-black text-indigo-600">0</div>
+                </div>
+                <div class="stat-card bg-white p-5 rounded-3xl border-l-4 border-l-blue-500">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold mb-2" data-i18n="stat-students">Ученики</div>
+                    <div id="stat-students" class="text-3xl font-black text-blue-600">0</div>
+                </div>
+                <div class="stat-card bg-white p-5 rounded-3xl border-l-4 border-l-green-500">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold mb-2" data-i18n="stat-linked">Связаны</div>
+                    <div id="stat-linked" class="text-3xl font-black text-green-600">0</div>
+                </div>
+                <div class="stat-card bg-white p-5 rounded-3xl border-l-4 border-l-orange-500">
+                    <div class="text-slate-400 text-[10px] uppercase font-bold mb-2" data-i18n="stat-unlinked">Без связи</div>
+                    <div id="stat-unlinked" class="text-3xl font-black text-orange-600">0</div>
+                </div>
             </div>
-            <table class="w-full text-left">
-                <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-                    <tr>
-                        <th class="p-4 font-bold">Имя Фамилия</th>
-                        <th class="p-4 font-bold">Email</th>
-                        <th class="p-4 font-bold">Статус</th>
-                        <th class="p-4 text-right font-bold">Действие</th>
-                    </tr>
-                </thead>
-                <tbody id="user-list" class="divide-y text-sm"></tbody>
-            </table>
+
+            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b">
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400" data-i18n="list-all">ПОЛЬЗОВАТЕЛИ СИСТЕМЫ</span>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <tr>
+                            <th class="p-4" data-i18n="th-name">ИМЯ ФАМИЛИЯ</th>
+                            <th class="p-4">EMAIL</th>
+                            <th class="p-4" data-i18n="th-status">СТАТУС</th>
+                            <th class="p-4 text-right" data-i18n="th-action">ДЕЙСТВИЕ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-users-list" class="divide-y text-sm"></tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
-            <div class="p-4 bg-indigo-50 font-bold text-indigo-700 border-b text-[10px] uppercase tracking-widest">Учебные связи (Учитель → Студент)</div>
-            <table class="w-full text-left">
-                <tbody id="schedule-list" class="divide-y text-xs"></tbody>
-            </table>
+        <div id="page-attendance" class="page-section">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="p-4 bg-emerald-600 text-white flex justify-between items-center">
+                    <span class="text-xs uppercase font-bold tracking-widest"><i class="fa-solid fa-calendar-check mr-2"></i> <span data-i18n="nav-att">Журнал посещаемости</span></span>
+                    <span class="text-[10px] font-black opacity-80" id="att-today-date">---</span>
+                </div>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <tr>
+                            <th class="p-4" data-i18n="th-teacher">Учитель</th>
+                            <th class="p-4" data-i18n="th-student">Ученик</th>
+                            <th class="p-4" data-i18n="th-lesson">Урок</th>
+                            <th class="p-4" data-i18n="th-date">Дата</th>
+                            <th class="p-4" data-i18n="th-status">Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-attendance-list" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page-teachers" class="page-section">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="p-4 bg-indigo-600 text-white font-bold text-xs uppercase" data-i18n="list-teachers">Список Учителей</div>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <tr>
+                            <th class="p-4" data-i18n="th-name">Имя Фамилия</th>
+                            <th class="p-4" data-i18n="opt-sub">Предмет</th>
+                            <th class="p-4" data-i18n="nav-students">Ученики</th>
+                            <th class="p-4 text-right" data-i18n="th-action">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-list" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page-students" class="page-section">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="p-4 bg-blue-600 text-white font-bold text-xs uppercase" data-i18n="list-students">Список Учеников</div>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <tr>
+                            <th class="p-4" data-i18n="th-name">Имя Фамилия</th>
+                            <th class="p-4" data-i18n="th-lvl">Уровень</th>
+                            <th class="p-4" data-i18n="th-status">Статус</th>
+                            <th class="p-4 text-right" data-i18n="th-action">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list" class="divide-y"></tbody>
+                </table>
+            </div>
         </div>
     </main>
 
     <div id="userModal" class="modal">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 text-slate-800">Регистрация</h2>
+        <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-t-[10px] border-blue-600">
+            <h2 class="text-2xl font-black mb-6 text-slate-800 uppercase italic" data-i18n="modal-create-title">Новый пользователь</h2>
             <div class="space-y-4">
-                <input type="text" id="reg_name" placeholder="Имя Фамилия" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:border-blue-500 transition">
-                <input type="email" id="reg_email" placeholder="Email" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:border-blue-500 transition">
-                <input type="password" id="reg_pass" placeholder="Пароль" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:border-blue-500 transition">
-                <select id="reg_role" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
-                    <option value="student">Студент</option>
-                    <option value="teacher">Учитель</option>
+                <select id="reg_role" onchange="toggleRoleFields()" class="w-full p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl font-bold text-blue-600 outline-none">
+                    <option value="student" data-i18n="opt-role-student">Ученик</option>
+                    <option value="teacher" data-i18n="opt-role-teacher">Учитель</option>
+                    <option value="admin" data-i18n="opt-role-admin">Администратор</option>
                 </select>
-                <button onclick="createUser()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold mt-4 shadow-lg hover:bg-blue-700 transition">Создать</button>
-                <button onclick="closeModal()" class="w-full text-slate-400 text-sm mt-2 text-center block">Отмена</button>
+                <input type="text" id="reg_name" data-i18n="ph-name" placeholder="Имя Фамилия" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
+                <input type="email" id="reg_email" data-i18n="ph-email" placeholder="Email" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
+                <input type="password" id="reg_pass" data-i18n="ph-pass" placeholder="Пароль" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
+                
+                <div id="student-only-fields">
+                    <select id="reg_lvl" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-slate-500 outline-none">
+                        <option value="" disabled selected data-i18n="opt-lvl">Уровень</option>
+                        <option value="A1">A1</option><option value="A2">A2</option>
+                        <option value="B1">B1</option><option value="B2">B2</option>
+                        <option value="C1">C1</option><option value="C2">C2</option>
+                    </select>
+                </div>
+                <div id="subject-field">
+                    <select id="reg_subject" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-slate-500 outline-none">
+                        <option value="" disabled selected data-i18n="opt-sub">Предмет</option>
+                        <option value="English" data-i18n="sub-eng">Английский</option>
+                        <option value="Math" data-i18n="sub-math">Математика</option>
+                        <option value="Programming" data-i18n="sub-prog">Программирование</option>
+                        <option value="Art" data-i18n="sub-art">Рисование</option>
+                    </select>
+                </div>
+
+                <button onclick="createUser()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-blue-600 transition shadow-lg" data-i18n="btn-save">Создать</button>
+                <button onclick="closeModal()" class="w-full text-slate-400 font-bold mt-2" data-i18n="btn-cancel">Отмена</button>
             </div>
         </div>
     </div>
 
     <div id="linkModal" class="modal">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 text-indigo-600">Создать связь</h2>
+        <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-t-[10px] border-indigo-600">
+            <h2 class="text-2xl font-black mb-6 text-slate-800 uppercase italic" data-i18n="btn-link">Связать</h2>
             <div class="space-y-4">
-                <label class="text-[10px] font-bold uppercase text-slate-400">Выберите учителя</label>
-                <select id="select_teacher" class="w-full p-3 bg-slate-50 border rounded-xl outline-none"></select>
-                
-                <label class="text-[10px] font-bold uppercase text-slate-400">Выберите ученика</label>
-                <select id="select_student" class="w-full p-3 bg-slate-50 border rounded-xl outline-none"></select>
-                
-                <button onclick="createLink()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">Подтвердить связь</button>
-                <button onclick="closeLinkModal()" class="w-full text-slate-400 text-sm mt-2 text-center block">Отмена</button>
+                <select id="link_teacher" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-slate-600 outline-none"></select>
+                <select id="link_student" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-slate-600 outline-none"></select>
+                <button onclick="saveLink()" class="w-full bg-indigo-600 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-indigo-700 transition shadow-lg" data-i18n="btn-save">Связать</button>
+                <button onclick="closeLinkModal()" class="w-full text-slate-400 font-bold mt-2" data-i18n="btn-cancel">Отмена</button>
             </div>
         </div>
     </div>
 
     <script>
         const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
-        
+
+        const translations = {
+            RU: {
+                "nav-dash": "Панель управления", "nav-teachers": "Учителя", "nav-students": "Ученики", "nav-att": "Посещаемость", "logout": "Выйти",
+                "btn-create": "Создать аккаунт", "btn-link": "Связать", "stat-all": "Всего", "stat-teachers": "Учителя", "stat-students": "Ученики",
+                "stat-linked": "Связаны", "stat-unlinked": "Без связи", "list-all": "ПОЛЬЗОВАТЕЛИ СИСТЕМЫ",
+                "list-teachers": "Список Учителей", "list-students": "Список Учеников", "th-name": "ИМЯ ФАМИЛИЯ", "th-status": "СТАТУС",
+                "th-action": "ДЕЙСТВИЕ", "th-lvl": "УРОВЕНЬ", "th-teacher": "УЧИТЕЛЬ", "th-student": "УЧЕНИК", "th-lesson": "УРОК", "th-date": "ДАТА",
+                "opt-role-student": "Ученик", "opt-role-teacher": "Учитель", "opt-role-admin": "Администратор",
+                "modal-create-title": "Новый пользователь", "opt-lvl": "Выберите уровень", "opt-sub": "Выберите урок",
+                "sub-eng": "Английский", "sub-math": "Математика", "sub-prog": "Программирование", "sub-art": "Рисование",
+                "btn-save": "Сохранить", "btn-cancel": "Отмена", "ph-name": "Имя Фамилия", "ph-email": "Email", "ph-pass": "Пароль",
+                "status-linked": "Связан", "status-free": "Свободен", "unit-stud": "уч.",
+                "att-present": "Пришел", "att-absent": "Не пришел", "att-late": "Опоздал", "att-trans": "Перенос",
+                "raw-present": "Был на уроке", "raw-absent": "Отсутствовал", "raw-trans": "Урок перенесён", "raw-late": "Опаздал на", "raw-moved": "Перенесено на"
+            },
+            EN: {
+                "nav-dash": "Dashboard", "nav-teachers": "Teachers", "nav-students": "Students", "nav-att": "Attendance", "logout": "Logout",
+                "btn-create": "Create Account", "btn-link": "Link", "stat-all": "Total", "stat-teachers": "Teachers", "stat-students": "Students",
+                "stat-linked": "Linked", "stat-unlinked": "Unlinked", "list-all": "SYSTEM USERS",
+                "list-teachers": "Teacher List", "list-students": "Student List", "th-name": "FULL NAME", "th-status": "STATUS",
+                "th-action": "ACTION", "th-lvl": "LEVEL", "th-teacher": "TEACHER", "th-student": "STUDENT", "th-lesson": "LESSON", "th-date": "DATE",
+                "opt-role-student": "Student", "opt-role-teacher": "Teacher", "opt-role-admin": "Admin",
+                "modal-create-title": "New User", "opt-lvl": "Select Level", "opt-sub": "Select Subject",
+                "sub-eng": "English", "sub-math": "Math", "sub-prog": "Programming", "sub-art": "Art",
+                "btn-save": "Save", "btn-cancel": "Cancel", "ph-name": "Full Name", "ph-email": "Email", "ph-pass": "Password",
+                "status-linked": "Linked", "status-free": "Free", "unit-stud": "std.",
+                "att-present": "Present", "att-absent": "Absent", "att-late": "Late", "att-trans": "Moved",
+                "raw-present": "Was in class", "raw-absent": "Was absent", "raw-trans": "Lesson moved", "raw-late": "Late by", "raw-moved": "Moved to"
+            },
+            AZ: {
+                "nav-dash": "İdarə paneli", "nav-teachers": "Müəllimlər", "nav-students": "Tələbələr", "nav-att": "Davamiyyət", "logout": "Çıxış",
+                "btn-create": "Hesab yarat", "btn-link": "Bağla", "stat-all": "Cəmi", "stat-teachers": "Müəllimlər", "stat-students": "Tələbələr",
+                "stat-linked": "Bağlı", "stat-unlinked": "Bağsız", "list-all": "SİSTEM İSTİFADƏÇİLƏRİ",
+                "list-teachers": "Müəllim siyahısı", "list-students": "Tələbə siyahısı", "th-name": "AD SOYAD", "th-status": "STATUS",
+                "th-action": "ƏMƏLİYYAT", "th-lvl": "SƏVİYYƏ", "th-teacher": "MÜƏLLİM", "th-student": "TƏLƏBƏ", "th-lesson": "DƏRS", "th-date": "TARİX",
+                "opt-role-student": "Tələbə", "opt-role-teacher": "Müəllim", "opt-role-admin": "Admin",
+                "modal-create-title": "Yeni istifadəçi", "opt-lvl": "Səviyyə seçin", "opt-sub": "Dərs seçin",
+                "sub-eng": "İngilis dili", "sub-math": "Riyaziyyat", "sub-prog": "Proqramlaşdırma", "sub-art": "Rəsm",
+                "btn-save": "Yadda saxla", "btn-cancel": "Ləğv et", "ph-name": "Ad Soyad", "ph-email": "Email", "ph-pass": "Şifrə",
+                "status-linked": "Bağlı", "status-free": "Boşdur", "unit-stud": "tələbə",
+                "att-present": "Gəldi", "att-absent": "Gəlmədi", "att-late": "Gecikdi", "att-trans": "Keçirildi",
+                "raw-present": "Dərsdə idi", "raw-absent": "İştirak etmirdi", "raw-trans": "Dərs keçirildi", "raw-late": "Gecikmə", "raw-moved": "Keçirilib"
+            }
+        };
+
         let usersArr = [];
-
-        async function loadData() {
-            const { data } = await _supabase.from('profiles').select('*');
-            if (data) {
-                usersArr = data;
-                document.getElementById('user-list').innerHTML = data.map(u => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-4 font-bold text-slate-700">${u.full_name || 'Без имени'}</td>
-                        <td class="p-4 text-slate-400 text-xs">${u.username}</td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${u.role==='teacher'?'bg-indigo-100 text-indigo-600':'bg-blue-100 text-blue-600'}">
-                                ${u.role}
-                            </span>
-                        </td>
-                        <td class="p-4 text-right">
-                            <button onclick="deleteUser('${u.id}')" class="text-red-300 hover:text-red-600 transition px-2">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-            loadSchedule();
-        }
-
-        async function loadSchedule() {
-            // Исправленный запрос с Join для получения имен
-            const { data } = await _supabase.from('schedule').select(`
-                id,
-                teacher:teacher_id (full_name),
-                student:student_id (full_name)
-            `);
-            
-            if (data) {
-                document.getElementById('schedule-list').innerHTML = data.map(s => `
-                    <tr class="hover:bg-indigo-50/30 transition">
-                        <td class="p-4 text-slate-600">
-                            Преподаватель <b class="text-indigo-600">${s.teacher?.full_name || '???'}</b> 
-                            <i class="fa-solid fa-arrow-right mx-2 opacity-30"></i> 
-                            ученик <b class="text-blue-600">${s.student?.full_name || '???'}</b>
-                        </td>
-                        <td class="p-4 text-right">
-                            <button onclick="unlink('${s.id}')" class="text-red-400 text-[10px] font-black uppercase hover:text-red-600 tracking-tighter">Развязать</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-        }
+        let scheduleArr = [];
 
         function setLang(lang) {
+            localStorage.setItem('admin_lang', lang);
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('l-' + lang).classList.add('active');
+            document.getElementById('l-' + lang)?.classList.add('active');
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const trans = translations[lang][key];
+                if (!trans) return;
+                if (el.tagName === 'INPUT') el.placeholder = trans;
+                else if (el.tagName === 'OPTION') el.innerText = trans;
+                else {
+                    const icon = el.querySelector('i');
+                    el.innerText = trans;
+                    if (icon) el.prepend(icon);
+                }
+            });
+            renderAllUsersTable(usersArr);
+            renderTeachers(usersArr, scheduleArr);
+            renderStudents(usersArr, scheduleArr);
+            loadAttendanceForAdmin();
         }
 
-        async function deleteUser(id) {
-            if (!confirm("Удалить пользователя?")) return;
-            await _supabase.from('profiles').delete().eq('id', id);
-            loadData();
+        async function showPage(pageId, navBtn) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                btn.classList.remove('active', 'text-white');
+                btn.classList.add('text-slate-300');
+            });
+            navBtn.classList.add('active', 'text-white');
+            if(pageId === 'attendance') loadAttendanceForAdmin();
         }
 
-        async function unlink(id) {
-            if (confirm("Разорвать связь?")) {
-                await _supabase.from('schedule').delete().eq('id', id);
-                loadSchedule();
-            }
-        }
-
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОЗДАНИЯ СВЯЗИ
-        async function createLink() {
-            const tId = document.getElementById('select_teacher').value;
-            const sId = document.getElementById('select_student').value;
+        async function loadAttendanceForAdmin() {
+            const lang = localStorage.getItem('admin_lang') || 'RU';
+            document.getElementById('att-today-date').innerText = new Date().toLocaleDateString();
             
-            if(!tId || !sId) return alert("Выберите учителя и ученика");
-            
-            const { error } = await _supabase.from('schedule').insert([{ 
-                teacher_id: tId, 
-                student_id: sId 
-            }]);
-            
-            if(error) {
-                alert("Ошибка: " + error.message);
-            } else {
-                closeLinkModal();
-                loadSchedule();
-            }
+            const { data, error } = await _supabase.from('attendance').select('*').order('date', { ascending: false });
+            if(error) return;
+
+            const statusMap = { 'present':'att-present', 'absent':'att-absent', 'late':'att-late', 'transferred':'att-trans' };
+
+            document.getElementById('admin-attendance-list').innerHTML = data.map(row => {
+                const t = usersArr.find(u => u.id === row.teacher_id) || { full_name: '---', subject: '---' };
+                const s = usersArr.find(u => u.id === row.student_id) || { full_name: '---' };
+                const statusKey = statusMap[row.status] || row.status;
+                const statusText = translations[lang][statusKey] || row.status;
+
+                let detailDisplay = row.details || '';
+                const replacers = [
+                    { ru: "Был на уроке", key: "raw-present" },
+                    { ru: "Отсутствовал", key: "raw-absent" },
+                    { ru: "Урок перенесён", key: "raw-trans" },
+                    { ru: "Опаздал на", key: "raw-late" },
+                    { ru: "Moved to", key: "raw-moved" }
+                ];
+
+                replacers.forEach(item => {
+                    const regex = new RegExp(item.ru + "|Moved to|Lesson moved|Was absent|Was in class|Dərsdə idi|İştirak etmirdi|Dərs keçirildi|Keçirilib", "gi");
+                    if(detailDisplay.match(regex)) {
+                        detailDisplay = detailDisplay.replace(regex, translations[lang][item.key]);
+                    }
+                });
+
+                let badgeClass = "bg-slate-100 text-slate-600";
+                if(row.status === 'present') badgeClass = "bg-green-100 text-green-700";
+                if(row.status === 'absent') badgeClass = "bg-red-100 text-red-700";
+                if(row.status === 'late') badgeClass = "bg-yellow-100 text-yellow-700";
+                if(row.status === 'transferred') badgeClass = "bg-orange-100 text-orange-700";
+
+                return `<tr class="hover:bg-slate-50 border-b">
+                    <td class="p-4 font-bold">${t.full_name}</td>
+                    <td class="p-4">${s.full_name}</td>
+                    <td class="p-4"><span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[10px] font-black">${t.subject}</span></td>
+                    <td class="p-4 text-xs text-slate-400">${new Date(row.date).toLocaleString()}</td>
+                    <td class="p-4">
+                        <span class="${badgeClass} px-2 py-1 rounded font-black text-[10px] uppercase">${statusText}</span>
+                        ${detailDisplay ? `<div class="text-[10px] text-orange-600 mt-1 font-bold italic"><i class="fa-solid fa-circle-info mr-1"></i>${detailDisplay}</div>` : ''}
+                    </td>
+                </tr>`;
+            }).join('');
         }
 
-        function openLinkModal() { 
-            // Заполнение выпадающих списков актуальными данными
+        // РАБОТА С МОДАЛКАМИ СВЯЗКИ
+        function openLinkModal() {
             const teachers = usersArr.filter(u => u.role === 'teacher');
             const students = usersArr.filter(u => u.role === 'student');
             
-            document.getElementById('select_teacher').innerHTML = teachers.map(u => `<option value="${u.id}">${u.full_name}</option>`).join('');
-            document.getElementById('select_student').innerHTML = students.map(u => `<option value="${u.id}">${u.full_name}</option>`).join('');
-            
-            document.getElementById('linkModal').classList.add('active'); 
+            document.getElementById('link_teacher').innerHTML = teachers.map(t => `<option value="${t.id}">${t.full_name} (${t.subject})</option>`).join('');
+            document.getElementById('link_student').innerHTML = students.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
+            document.getElementById('linkModal').classList.add('active');
         }
 
         function closeLinkModal() { document.getElementById('linkModal').classList.remove('active'); }
-        function openModal() { document.getElementById('userModal').classList.add('active'); }
+
+        async function saveLink() {
+            const teacher_id = document.getElementById('link_teacher').value;
+            const student_id = document.getElementById('link_student').value;
+            const { error } = await _supabase.from('schedule').insert([{ teacher_id, student_id }]);
+            if(error) alert(error.message);
+            else { closeLinkModal(); loadData(); }
+        }
+
+        function renderTeachers(arr, schedule) {
+            const lang = localStorage.getItem('admin_lang') || 'RU';
+            const teachers = arr.filter(u => u.role === 'teacher');
+            document.getElementById('teacher-list').innerHTML = teachers.map(u => {
+                const count = schedule.filter(s => s.teacher_id === u.id).length;
+                return `<tr class="border-b hover:bg-slate-50">
+                    <td class="p-4 font-bold">${u.full_name}</td>
+                    <td class="p-4 text-indigo-600 font-medium">${u.subject || '-'}</td>
+                    <td class="p-4"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">${count} ${translations[lang]['unit-stud']}</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteUser('${u.id}')" class="text-red-300 hover:text-red-600"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderStudents(arr, schedule) {
+            const lang = localStorage.getItem('admin_lang') || 'RU';
+            const students = arr.filter(u => u.role === 'student');
+            document.getElementById('student-list').innerHTML = students.map(u => {
+                const linked = schedule.some(s => s.student_id === u.id);
+                return `<tr class="border-b hover:bg-slate-50">
+                    <td class="p-4 font-bold">${u.full_name}</td>
+                    <td class="p-4 text-xs font-black text-slate-400">${u.level || '---'}</td>
+                    <td class="p-4 text-[10px] font-black uppercase ${linked?'text-green-500':'text-orange-400'}">${linked ? translations[lang]['status-linked'] : translations[lang]['status-free']}</td>
+                    <td class="p-4 text-right"><button onclick="deleteUser('${u.id}')" class="text-red-300 hover:text-red-600"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderAllUsersTable(users) {
+            document.getElementById('all-users-list').innerHTML = users.map(u => `
+                <tr class="hover:bg-slate-50 border-b text-sm">
+                    <td class="p-4 font-bold">${u.full_name}</td>
+                    <td class="p-4 text-slate-400">${u.username}</td>
+                    <td class="p-4"><span class="badge badge-${u.role}">${u.role.toUpperCase()}</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteUser('${u.id}')" class="text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>`).join('');
+        }
+
+        async function loadData() {
+            const { data: p } = await _supabase.from('profiles').select('*');
+            const { data: s } = await _supabase.from('schedule').select('*');
+            if (p) {
+                usersArr = p;
+                scheduleArr = s || [];
+                updateStats();
+                setLang(localStorage.getItem('admin_lang') || 'RU');
+            }
+        }
+
+        function updateStats() {
+            const stds = usersArr.filter(u => u.role === 'student');
+            const linkedIds = [...new Set(scheduleArr.map(s => s.student_id))];
+            document.getElementById('stat-all').innerText = usersArr.length;
+            document.getElementById('stat-teachers').innerText = usersArr.filter(u => u.role === 'teacher').length;
+            document.getElementById('stat-students').innerText = stds.length;
+            document.getElementById('stat-linked').innerText = stds.filter(s => linkedIds.includes(s.id)).length;
+            document.getElementById('stat-unlinked').innerText = stds.length - stds.filter(s => linkedIds.includes(s.id)).length;
+        }
+
+        async function deleteUser(id) { if(confirm("Удалить?")) { await _supabase.from('profiles').delete().eq('id', id); loadData(); } }
+        function openModal() { document.getElementById('userModal').classList.add('active'); toggleRoleFields(); }
         function closeModal() { document.getElementById('userModal').classList.remove('active'); }
+        function toggleRoleFields() {
+            const r = document.getElementById('reg_role').value;
+            document.getElementById('student-only-fields').style.display = (r === 'student' ? 'block' : 'none');
+            document.getElementById('subject-field').style.display = (r === 'admin' ? 'none' : 'block');
+        }
 
         async function createUser() {
+            const role = document.getElementById('reg_role').value;
+            const name = document.getElementById('reg_name').value;
             const email = document.getElementById('reg_email').value;
             const pass = document.getElementById('reg_pass').value;
-            const name = document.getElementById('reg_name').value;
-            const role = document.getElementById('reg_role').value;
-            
+            const lvl = document.getElementById('reg_lvl').value;
+            const sub = document.getElementById('reg_subject').value;
+
+            if(!name || !email || !pass) return alert("Fill all fields");
+
             const { data, error } = await _supabase.auth.signUp({ email, password: pass });
-            if (!error) {
-                await _supabase.from('profiles').insert([{ id: data.user.id, full_name: name, role: role, username: email }]);
-                closeModal();
-                loadData();
-            } else {
-                alert(error.message);
-            }
+            if (error) return alert(error.message);
+
+            await _supabase.from('profiles').insert([{
+                id: data.user.id,
+                username: email,
+                full_name: name,
+                role: role,
+                level: role === 'student' ? lvl : null,
+                subject: role !== 'admin' ? sub : null
+            }]);
+
+            closeModal();
+            loadData();
         }
 
         async function logout() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
 
-        loadData();
+        window.onload = loadData;
+        _supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, loadData).subscribe();
     </script>
 </body>
 </html>
