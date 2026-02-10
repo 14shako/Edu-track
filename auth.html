@@ -139,12 +139,16 @@ async function handleRegister() {
                     const testObj = JSON.parse(savedTest);
                     
                     // Отправляем данные в таблицу test_results
-                    await _supabase.from('test_results').insert([{
-                        student_name: name,
-                        score: testObj.points,
-                        time_taken: testObj.time,
-                        user_id: aData.user.id
-                    }]);
+// Внутри handleRegister, где отправляем результат:
+await _supabase.from('test_results').insert([{
+    student_name: name,
+    score: testObj.points,
+    wrong_answers: testObj.wrong,
+    total_questions: testObj.total,
+    time_taken: testObj.time,
+    answers_detail: testObj.details, // Массив со всеми вопросами и ответами
+    user_id: aData.user.id
+}]);
 
                     // Удаляем из памяти, чтобы не дублировать при следующей регистрации
                     localStorage.removeItem('lastTestResult');
