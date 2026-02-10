@@ -1,162 +1,294 @@
 ﻿<!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduTrack</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>EduTrack | Smart Learning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); font-family: 'Inter', sans-serif; }
-        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .hidden { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; }
+
+        .scroll-container {
+            height: 100vh;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .section {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            scroll-snap-align: start;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(79, 70, 229, 0.7));
+            z-index: 1;
+        }
+
+        nav, .hero-body, .dots, .teachers-grid { z-index: 10; position: relative; }
+
+        /* Навигация */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 30px 60px;
+            z-index: 100;
+        }
+
+        .logo { font-size: 32px; font-weight: 900; color: white; letter-spacing: -2px; text-transform: uppercase; font-style: italic; text-align: center;}
+        
+        .nav-left { display: flex; gap: 20px; align-items: center; }
+        .nav-right { display: flex; gap: 20px; align-items: center; justify-content: flex-end; }
+        
+        /* Стили кнопок в шапке */
+        .nav-link { 
+            color: white; 
+            text-decoration: none; 
+            font-weight: 700; 
+            font-size: 13px; 
+            opacity: 0.8; 
+            transition: 0.3s; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-link:hover { opacity: 1; color: #fbbf24; }
+
+        .lang-switcher { display: flex; background: rgba(255,255,255,0.1); padding: 4px; border-radius: 10px; backdrop-filter: blur(5px); }
+        .lang-btn { color: white; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 7px; transition: 0.3s; cursor: pointer; }
+        .lang-btn.active { background: #fbbf24; color: #1e1b4b; }
+
+        .btn-login { border: 2px solid white; color: white; padding: 8px 25px; border-radius: 12px; font-weight: 700; transition: 0.3s; }
+        .btn-login:hover { background: white; color: #1e1b4b; }
+
+        /* Контент слайдов */
+        .hero-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; color: white; }
+        .hero-body h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; line-height: 1; margin-bottom: 20px; max-width: 850px; }
+        .hero-body p { max-width: 600px; font-size: 1.1rem; line-height: 1.7; opacity: 0.8; margin-bottom: 30px; border-left: 4px solid #fbbf24; padding-left: 20px; }
+
+        .btn-start {
+            background: #fbbf24; color: #1e1b4b; width: fit-content; padding: 18px 40px; border-radius: 15px;
+            font-size: 16px; font-weight: 900; display: flex; align-items: center; gap: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* КАРТОЧКИ УЧИТЕЛЕЙ */
+        .teachers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+        .teacher-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 15px;
+            transition: 0.3s;
+            text-align: center;
+        }
+        .teacher-card:hover { transform: translateY(-10px); background: rgba(255, 255, 255, 0.1); border-color: #fbbf24; }
+        .video-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 18px; overflow: hidden; margin-bottom: 15px; }
+        .video-box video { width: 100%; height: 100%; object-fit: cover; }
+        .teacher-name { font-size: 20px; font-weight: 900; color: #fbbf24; margin-bottom: 5px; }
+        .teacher-subject { font-size: 14px; font-weight: 600; color: white; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Точки справа */
+        .dots { position: fixed; right: 40px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; z-index: 100; }
+        .dot { width: 8px; height: 30px; background: rgba(255, 255, 255, 0.2); border-radius: 20px; transition: 0.4s; cursor: pointer; }
+        .dot.active { background: #fbbf24; height: 50px; }
+
+        @media (max-width: 1024px) {
+            nav { padding: 20px; grid-template-columns: 1fr 1fr; }
+            .nav-left, .dots { display: none; }
+            .hero-body { padding: 80px 5% 20px; justify-content: flex-start; }
+            .scroll-container { overflow-y: scroll; }
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body>
 
-    <div class="fixed top-6 right-6 flex gap-2 bg-white/50 p-2 rounded-2xl backdrop-blur-md border border-white">
-        <button onclick="setLang('ru')" class="px-3 py-1 rounded-xl text-xs font-black transition-all" id="btn-ru">RU</button>
-        <button onclick="setLang('en')" class="px-3 py-1 rounded-xl text-xs font-black transition-all" id="btn-en">EN</button>
-        <button onclick="setLang('az')" class="px-3 py-1 rounded-xl text-xs font-black transition-all" id="btn-az">AZ</button>
+    <nav>
+        <div class="nav-left">
+            <a href="#" class="nav-link" data-lang-key="home">Home</a>
+            <a href="#" class="nav-link" data-lang-key="demo">Demo Lesson</a>
+<a href="javascript:void(0)" onclick="scrollToSection(3)" class="nav-link" data-lang-key="nav-teachers">Teachers</a>
+            <a href="file:///C:/Users/Aveo%20TVS/Desktop/test.html" class="nav-link" data-lang-key="nav-test">Check Level</a>
+        </div>
+        
+        <div class="logo">EDUTRACK</div>
+        
+        <div class="nav-right">
+            <div class="lang-switcher">
+                <button onclick="changeLang('en')" id="l-en" class="lang-btn active">EN</button>
+                <button onclick="changeLang('ru')" id="l-ru" class="lang-btn">RU</button>
+                <button onclick="changeLang('az')" id="l-az" class="lang-btn">AZ</button>
+            </div>
+            <a href="auth.html" class="btn-login" data-lang-key="login">Login</a>
+        </div>
+    </nav>
+
+    <div class="dots">
+        <div class="dot active" onclick="scrollToSection(0)"></div>
+        <div class="dot" onclick="scrollToSection(1)"></div>
+        <div class="dot" onclick="scrollToSection(2)"></div>
+        <div class="dot" onclick="scrollToSection(3)"></div>
     </div>
 
-    <div class="glass-card w-full max-w-md p-10 rounded-[40px] shadow-2xl">
-        <div class="text-center mb-10">
-            <div class="text-4xl font-black text-blue-600 tracking-tighter italic mb-2">EDUTRACK</div>
-            <p id="t-subtitle" class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Панель управления</p>
-        </div>
+    <div class="scroll-container" id="scroll-container">
+        
+        <section class="section" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071');">
+            <div class="hero-body">
+                <h1 data-slide="0" data-type="title">Unlock Your Potential <br> With Smart Learning</h1>
+                <p data-slide="0" data-type="desc">Achieve your goals with our professional English programs. We offer tailored education paths for all skill levels.</p>
+                <button onclick="window.location.href='auth.html'" class="btn-start">
+                    <span data-slide="0" data-type="btn">Start Journey</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
 
-        <div id="login-form" class="space-y-5">
-            <div>
-                <label id="t-email-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Email</label>
-                <input type="email" id="email" placeholder="email@example.com" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+        <section class="section" style="background-image: url('https://images.unsplash.com/photo-1507679799912-32b4b457e5d1?q=80&w=2071');">
+            <div class="hero-body">
+                <h1 data-slide="1" data-type="title">Test Your Knowledge <br> And Grow!</h1>
+                <p data-slide="1" data-type="desc">Curious about your English level? Take our quick 10-question quiz and discover where you stand right now.</p>
+                <button onclick="window.location.href='#'" class="btn-start">
+                    <span data-slide="1" data-type="btn">Take the Quiz</span> <i class="fa-solid fa-vial"></i>
+                </button>
             </div>
-            <div>
-                <label id="t-pass-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
-                <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
-            </div>
-            <button onclick="handleLogin()" id="login-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-blue-600 transition-all uppercase tracking-widest text-sm text-center">Войти</button>
-            <p class="text-center text-xs font-bold text-slate-400">
-                <span id="t-no-acc">Нет аккаунта?</span> 
-                <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-reg">Зарегистрироваться</button>
-            </p>
-        </div>
+        </section>
 
-        <div id="register-form" class="space-y-5 hidden">
-            <div>
-                <label id="t-reg-name" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Имя ученика</label>
-                <input type="text" id="reg-fullname" placeholder="Имя Фамилия" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+        <section class="section" style="background-image: url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2071');">
+            <div class="hero-body">
+                <h1 data-slide="2" data-type="title">Experience a Class <br> For Free!</h1>
+                <p data-slide="2" data-type="desc">Try our platform with one free demo lesson. Meet the tutor, explore the materials, and start learning today!</p>
+                <button onclick="window.location.href='auth.html'" class="btn-start">
+                    <span data-slide="2" data-type="btn">Book Demo Lesson</span> <i class="fa-solid fa-graduation-cap"></i>
+                </button>
             </div>
-            <div>
-                <label id="t-reg-email" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Email</label>
-                <input type="email" id="reg-email-val" placeholder="student@example.com" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
-            </div>
-            <div>
-                <label id="t-reg-pass" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
-                <input type="password" id="reg-password-val" placeholder="••••••••" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
-            </div>
-            <input type="hidden" id="reg-role-val" value="student">
-            
-            <button onclick="handleRegister()" id="reg-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all uppercase tracking-widest text-sm text-center">Создать профиль ученика</button>
-            <p class="text-center text-xs font-bold text-slate-400">
-                <span id="t-have-acc">Уже есть аккаунт?</span> 
-                <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-login">Войти</button>
-            </p>
-        </div>
+        </section>
 
-        <div id="loader" class="hidden text-center py-4">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-            <p id="t-loading" class="text-slate-500 font-bold mt-2 italic">Загрузка...</p>
-        </div>
+        <section class="section" style="background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070');">
+            <div class="hero-body">
+                <h1 id="t-teachers-title">Meet Our Expert Tutors</h1>
+                <div class="teachers-grid">
+                    <div class="teacher-card">
+                        <div class="video-box">
+                            <video controls poster="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=500">
+                                <source src="video1.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="teacher-name">Sarah Johnson</div>
+                        <div class="teacher-subject" data-lang-key="subj-eng">General English</div>
+                    </div>
+                    <div class="teacher-card">
+                        <div class="video-box">
+                            <video controls poster="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=500">
+                                <source src="video2.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="teacher-name">Alex Rivera</div>
+                        <div class="teacher-subject" data-lang-key="subj-ielts">IELTS Preparation</div>
+                    </div>
+                    <div class="teacher-card">
+                        <div class="video-box">
+                            <video controls poster="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=500">
+                                <source src="video3.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="teacher-name">Elena Petrova</div>
+                        <div class="teacher-subject" data-lang-key="subj-bus">Business English</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <script>
-        const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
-
         const translations = {
-            ru: { subtitle: "Панель управления", email: "Email", pass: "Пароль", btn: "Войти", noAcc: "Нет аккаунта?", linkReg: "Зарегистрироваться", regName: "Имя ученика", regBtn: "Создать профиль ученика", haveAcc: "Есть аккаунт?", linkLogin: "Войти", loading: "Загрузка..." },
-            en: { subtitle: "Management Panel", email: "Email", pass: "Password", btn: "Sign In", noAcc: "No account?", linkReg: "Student Signup", regName: "Student Name", regBtn: "Create Student Profile", haveAcc: "Have account?", linkLogin: "Login", loading: "Processing..." },
-            az: { subtitle: "İdarəetmə Paneli", email: "Email", pass: "Şifrə", btn: "Daxil ol", noAcc: "Hesab yoxdur?", linkReg: "Qeydiyyat", regName: "Tələbə adı", regBtn: "Tələbə hesabı yarat", haveAcc: "Hesabınız var?", linkLogin: "Daxil ol", loading: "Gözləyin..." }
+            en: {
+                home: "Home", demo: "Demo Lesson", login: "Login",
+                "nav-teachers": "Teachers", "nav-test": "Check Level",
+                "subj-eng": "General English", "subj-ielts": "IELTS Preparation", "subj-bus": "Business English",
+                "teachers-title": "Meet Our Expert Tutors",
+                slides: [
+                    { title: "Unlock Your Potential <br> With Smart Learning", desc: "Achieve your goals with our professional English programs. We offer tailored education paths for all skill levels.", btn: "Start Journey" },
+                    { title: "Test Your Knowledge <br> And Grow!", desc: "Curious about your English level? Take our quick 10-question quiz and discover where you stand right now.", btn: "Take the Quiz" },
+                    { title: "Experience a Class <br> For Free!", desc: "Try our platform with one free demo lesson. Meet the tutor, explore the materials, and start learning today!", btn: "Book Demo Lesson" }
+                ]
+            },
+            ru: {
+                home: "Главная", demo: "Демо-урок", login: "Войти",
+                "nav-teachers": "Учителя", "nav-test": "Проверь знания",
+                "subj-eng": "Общий английский", "subj-ielts": "Подготовка к IELTS", "subj-bus": "Бизнес английский",
+                "teachers-title": "Наши профессиональные учителя",
+                slides: [
+                    { title: "Раскрой свой потенциал <br> с EduTrack", desc: "Достигайте своих целей с профессиональными программами английского языка. Индивидуальный подход для всех.", btn: "Начать путь" },
+                    { title: "Проверь свои знания <br> и развивайся!", desc: "Хочешь узнать свой уровень? Пройди быстрый тест из 10 вопросов и узнай результат мгновенно.", btn: "Пройти тест" },
+                    { title: "Зарегистрируй <br> Демо-урок!", desc: "Попробуй платформу бесплатно! Один полноценный демо-урок: познакомься с учителем и материалами.", btn: "Записаться на демо" }
+                ]
+            },
+            az: {
+                home: "Ana Səhifə", demo: "Demo Dərs", login: "Daxil ol",
+                "nav-teachers": "Müəllimlər", "nav-test": "Səviyyəni Yoxla",
+                "subj-eng": "Ümumi İngilis dili", "subj-ielts": "IELTS Hazırlığı", "subj-bus": "Biznes İngilis dili",
+                "teachers-title": "Bizim peşəkar müəllimlərimiz",
+                slides: [
+                    { title: "EduTrack ilə <br> Potensialını Kəşf Et", desc: "Peşəkar ingilis dili proqramlarımızla hədəflərinizə çatın. Hər kəs üçün fərdi təhsil yolları təklif edirik.", btn: "Yola Başla" },
+                    { title: "Biliklərinizi Yoxlayın <br> Və İnkişaf Edin!", desc: "Səviyyənizi bilmək istəyirsiniz? 10 suallıq sürətli testimizi keçin və harada olduğunuzu öyrənin.", btn: "Testi keç" },
+                    { title: "Ödənişsiz <br> Demo Dərs!", desc: "Platformamızı pulsuz sınaqdan keçirin! Bir tam demo dərs: müəllim və materiallarla tanış olun.", btn: "Demo dərs yazıl" }
+                ]
+            }
         };
 
-        function setLang(lang) {
+        function changeLang(lang) {
             localStorage.setItem('selectedLang', lang);
             const t = translations[lang];
-            document.getElementById('t-subtitle').innerText = t.subtitle;
-            document.getElementById('t-email-label').innerText = t.email;
-            document.getElementById('t-pass-label').innerText = t.pass;
-            document.getElementById('login-btn').innerText = t.btn;
-            document.getElementById('t-no-acc').innerText = t.noAcc;
-            document.getElementById('t-link-reg').innerText = t.linkReg;
-            document.getElementById('t-reg-name').innerText = t.regName;
-            document.getElementById('t-reg-email').innerText = t.email;
-            document.getElementById('t-reg-pass').innerText = t.pass;
-            document.getElementById('reg-btn').innerText = t.regBtn;
-            document.getElementById('t-have-acc').innerText = t.haveAcc;
-            document.getElementById('t-link-login').innerText = t.linkLogin;
-            document.getElementById('t-loading').innerText = t.loading;
-            
-            ['ru', 'en', 'az'].forEach(l => {
-                const btn = document.getElementById('btn-' + l);
-                btn.className = (l === lang) ? "px-3 py-1 rounded-xl text-xs font-black bg-blue-600 text-white shadow-md" : "px-3 py-1 rounded-xl text-xs font-black text-slate-600 hover:bg-white";
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                el.innerText = t[key];
             });
+
+            document.getElementById('t-teachers-title').innerText = t["teachers-title"];
+
+            document.querySelectorAll('[data-slide]').forEach(el => {
+                const idx = el.getAttribute('data-slide');
+                const type = el.getAttribute('data-type');
+                if (type === 'title') el.innerHTML = t.slides[idx].title;
+                else el.innerText = t.slides[idx][type];
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('l-' + lang).classList.add('active');
         }
 
-        function toggleForm() {
-            document.getElementById('login-form').classList.toggle('hidden');
-            document.getElementById('register-form').classList.toggle('hidden');
+        function scrollToSection(index) {
+            document.getElementById('scroll-container').scrollTo({ top: window.innerHeight * index, behavior: 'smooth' });
         }
 
-        async function handleRegister() {
-            const name = document.getElementById('reg-fullname').value;
-            const email = document.getElementById('reg-email-val').value;
-            const pass = document.getElementById('reg-password-val').value;
-            const role = "student"; // Жестко задано
+        document.getElementById('scroll-container').addEventListener('scroll', function() {
+            const index = Math.round(this.scrollTop / window.innerHeight);
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
+        });
 
-            if(!name || !email || !pass) { alert("Заполните все поля"); return; }
-
-            showLoader(true);
-            const { data: aData, error: aErr } = await _supabase.auth.signUp({ email, password: pass });
-            if(aErr) { alert(aErr.message); showLoader(false); return; }
-
-            const { error: pErr } = await _supabase.from('profiles').insert([{
-                id: aData.user.id,
-                full_name: name,
-                username: email,
-                role: role
-            }]);
-
-            if(pErr) { alert(pErr.message); showLoader(false); return; }
-            
-            alert("Аккаунт ученика создан! Теперь войдите.");
-            location.reload();
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            if(!email || !pass) return;
-
-            showLoader(true);
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-            if(error) { alert(error.message); showLoader(false); return; }
-
-            const { data: p } = await _supabase.from('profiles').select('role').eq('id', data.user.id).single();
-            if(p) {
-                if(p.role === 'admin') window.location.href = 'admin.html';
-                else if(p.role === 'teacher') window.location.href = 'teacher.html';
-                else window.location.href = 'student.html';
-            }
-        }
-
-        function showLoader(show) {
-            document.getElementById('loader').classList.toggle('hidden', !show);
-            document.getElementById('login-form').classList.toggle('hidden', show);
-            document.getElementById('register-form').classList.add('hidden');
-        }
-
-        window.onload = () => { setLang(localStorage.getItem('selectedLang') || 'ru'); };
+        window.onload = () => changeLang(localStorage.getItem('selectedLang') || 'en');
     </script>
 </body>
 </html>

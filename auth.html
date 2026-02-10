@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="fixed top-6 right-6 flex gap-2 bg-white/50 p-2 rounded-2xl backdrop-blur-md border border-white">
+        <button onclick="setLang('ru')" class="px-3 py-1 rounded-xl text-xs font-black transition-all" id="btn-ru">RU</button>
+        <button onclick="setLang('en')" class="px-3 py-1 rounded-xl text-xs font-black transition-all" id="btn-en">EN</button>
+        <button onclick="setLang('az')" class="px-3 py-1 rounded-xl text-xs font-black transition-all" id="btn-az">AZ</button>
+    </div>
+
+    <div class="glass-card w-full max-w-md p-10 rounded-[40px] shadow-2xl">
+        <div class="text-center mb-10">
+            <div class="text-4xl font-black text-blue-600 tracking-tighter italic mb-2">EDUTRACK</div>
+            <p id="t-subtitle" class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Панель управления</p>
+        </div>
+
+        <div id="login-form" class="space-y-5">
+            <div>
+                <label id="t-email-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Email</label>
+                <input type="email" id="email" placeholder="email@example.com" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+            <div>
+                <label id="t-pass-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
+                <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+            <button onclick="handleLogin()" id="login-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-blue-600 transition-all uppercase tracking-widest text-sm text-center">Войти</button>
+            <p class="text-center text-xs font-bold text-slate-400">
+                <span id="t-no-acc">Нет аккаунта?</span> 
+                <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-reg">Зарегистрироваться</button>
+            </p>
+        </div>
+
+        <div id="register-form" class="space-y-5 hidden">
+            <div>
+                <label id="t-reg-name" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Имя ученика</label>
+                <input type="text" id="reg-fullname" placeholder="Имя Фамилия" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+            <div>
+                <label id="t-reg-email" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Email</label>
+                <input type="email" id="reg-email-val" placeholder="student@example.com" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+            <div>
+                <label id="t-reg-pass" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
+                <input type="password" id="reg-password-val" placeholder="••••••••" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+            </div>
+            <input type="hidden" id="reg-role-val" value="student">
+            
+            <button onclick="handleRegister()" id="reg-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all uppercase tracking-widest text-sm text-center">Создать профиль ученика</button>
+            <p class="text-center text-xs font-bold text-slate-400">
+                <span id="t-have-acc">Уже есть аккаунт?</span> 
+                <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-login">Войти</button>
+            </p>
+        </div>
+
+        <div id="loader" class="hidden text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+            <p id="t-loading" class="text-slate-500 font-bold mt-2 italic">Загрузка...</p>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
+
+        const translations = {
+            ru: { subtitle: "Панель управления", email: "Email", pass: "Пароль", btn: "Войти", noAcc: "Нет аккаунта?", linkReg: "Зарегистрироваться", regName: "Имя ученика", regBtn: "Создать профиль ученика", haveAcc: "Есть аккаунт?", linkLogin: "Войти", loading: "Загрузка..." },
+            en: { subtitle: "Management Panel", email: "Email", pass: "Password", btn: "Sign In", noAcc: "No account?", linkReg: "Student Signup", regName: "Student Name", regBtn: "Create Student Profile", haveAcc: "Have account?", linkLogin: "Login", loading: "Processing..." },
+            az: { subtitle: "İdarəetmə Paneli", email: "Email", pass: "Şifrə", btn: "Daxil ol", noAcc: "Hesab yoxdur?", linkReg: "Qeydiyyat", regName: "Tələbə adı", regBtn: "Tələbə hesabı yarat", haveAcc: "Hesabınız var?", linkLogin: "Daxil ol", loading: "Gözləyin..." }
+        };
+
+        function setLang(lang) {
+            localStorage.setItem('selectedLang', lang);
+            const t = translations[lang];
+            document.getElementById('t-subtitle').innerText = t.subtitle;
+            document.getElementById('t-email-label').innerText = t.email;
+            document.getElementById('t-pass-label').innerText = t.pass;
+            document.getElementById('login-btn').innerText = t.btn;
+            document.getElementById('t-no-acc').innerText = t.noAcc;
+            document.getElementById('t-link-reg').innerText = t.linkReg;
+            document.getElementById('t-reg-name').innerText = t.regName;
+            document.getElementById('t-reg-email').innerText = t.email;
+            document.getElementById('t-reg-pass').innerText = t.pass;
+            document.getElementById('reg-btn').innerText = t.regBtn;
+            document.getElementById('t-have-acc').innerText = t.haveAcc;
+            document.getElementById('t-link-login').innerText = t.linkLogin;
+            document.getElementById('t-loading').innerText = t.loading;
+            
+            ['ru', 'en', 'az'].forEach(l => {
+                const btn = document.getElementById('btn-' + l);
+                btn.className = (l === lang) ? "px-3 py-1 rounded-xl text-xs font-black bg-blue-600 text-white shadow-md" : "px-3 py-1 rounded-xl text-xs font-black text-slate-600 hover:bg-white";
+            });
+        }
+
+        function toggleForm() {
+            document.getElementById('login-form').classList.toggle('hidden');
+            document.getElementById('register-form').classList.toggle('hidden');
+        }
+
+async function handleRegister() {
+            const name = document.getElementById('reg-fullname').value;
+            const email = document.getElementById('reg-email-val').value;
+            const pass = document.getElementById('reg-password-val').value;
+            const role = "student"; 
+
+            if(!name || !email || !pass) { alert("Заполните все поля"); return; }
+
+            showLoader(true);
+            const { data: aData, error: aErr } = await _supabase.auth.signUp({ email, password: pass });
+            if(aErr) { alert(aErr.message); showLoader(false); return; }
+
+            // 1. Создаем профиль в таблице profiles
+            const { error: pErr } = await _supabase.from('profiles').insert([{
+                id: aData.user.id,
+                full_name: name,
+                username: email,
+                role: role
+            }]);
+
+            if(pErr) { alert(pErr.message); showLoader(false); return; }
+
+            // --- НОВЫЙ БЛОК: СОХРАНЕНИЕ ТЕСТА ---
+            // Проверяем, есть ли сохраненный тест из localStorage
+            const savedTest = localStorage.getItem('lastTestResult');
+            
+            if (savedTest) {
+                try {
+                    const testObj = JSON.parse(savedTest);
+                    
+                    // Отправляем данные в таблицу test_results
+                    await _supabase.from('test_results').insert([{
+                        student_name: name,
+                        score: testObj.points,
+                        time_taken: testObj.time,
+                        user_id: aData.user.id
+                    }]);
+
+                    // Удаляем из памяти, чтобы не дублировать при следующей регистрации
+                    localStorage.removeItem('lastTestResult');
+                    console.log("Результат теста успешно привязан к новому аккаунту!");
+                } catch (e) {
+                    console.error("Ошибка при сохранении теста:", e);
+                }
+            }
+            // ------------------------------------
+            
+            alert("Аккаунт ученика создан и результат теста сохранен! Теперь войдите.");
+            location.reload();
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if(!email || !pass) return;
+
+            showLoader(true);
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+            if(error) { alert(error.message); showLoader(false); return; }
+
+            const { data: p } = await _supabase.from('profiles').select('role').eq('id', data.user.id).single();
+            if(p) {
+                if(p.role === 'admin') window.location.href = 'admin.html';
+                else if(p.role === 'teacher') window.location.href = 'teacher.html';
+                else window.location.href = 'student.html';
+            }
+        }
+
+        function showLoader(show) {
+            document.getElementById('loader').classList.toggle('hidden', !show);
+            document.getElementById('login-form').classList.toggle('hidden', show);
+            document.getElementById('register-form').classList.add('hidden');
+        }
+
+        window.onload = () => { setLang(localStorage.getItem('selectedLang') || 'ru'); };
+    </script>
+</body>
+</html>

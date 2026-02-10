@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack | Level Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%); 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            padding: 20px;
+            border-radius: 18px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .option-btn:hover {
+            background: #fbbf24;
+            color: #1e1b4b;
+            border-color: #fbbf24;
+            transform: translateX(10px);
+        }
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #fbbf24;
+            width: 0%;
+            transition: width 0.4s;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card">
+        <div id="quiz-screen">
+            <div class="flex justify-between items-center mb-2">
+                <span id="step-counter" class="text-xs font-black uppercase tracking-widest text-blue-300">Question 1 of 10</span>
+                <span id="timer-display" class="text-xs font-bold text-yellow-400"><i class="fa-regular fa-clock mr-1"></i> 00:00</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress" class="progress-fill"></div>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl font-black mb-8 leading-tight">Loading...</h2>
+            
+            <div id="options-container" class="space-y-4">
+                </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <div class="text-6xl mb-6">🎯</div>
+            <h2 class="text-3xl font-black mb-2">Test Completed!</h2>
+            <p class="text-blue-200 mb-2">Your English Score:</p>
+            <div class="text-6xl font-black text-yellow-400 mb-2" id="final-score">0/10</div>
+            <p id="time-taken" class="text-sm text-white/60 mb-8">Time: 00:00</p>
+            
+            <div class="flex flex-col gap-4">
+                <button onclick="location.href='index.html'" class="bg-white text-indigo-900 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 transition-all">
+                    Back to Home
+                </button>
+                <button onclick="location.href='auth.html'" ...>Register & Save Result</button>
+<button onclick="window.location.href='auth.html'" class="border-2 border-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-white hover:text-indigo-900 transition-all">
+    Register & Save Result
+</button>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ШАГ 2: Инициализация (замени URL и KEY на свои из админки)
+    const { createClient } = supabase;
+    const _supabase = createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
+
+    const quizData = [
+        { q: "I ___ to the gym every day.", options: ["go", "goes", "going", "gone"], correct: 0 },
+        { q: "She ___ English very well.", options: ["speak", "speaks", "speaking", "is speak"], correct: 1 },
+        { q: "Where ___ you live?", options: ["does", "do", "are", "is"], correct: 1 },
+        { q: "Listen! The birds ___.", options: ["sing", "sings", "are singing", "is singing"], correct: 2 },
+        { q: "I ___ seen that movie before.", options: ["am", "have", "has", "did"], correct: 1 },
+        { q: "If it rains, we ___ stay at home.", options: ["would", "will", "did", "are"], correct: 1 },
+        { q: "This is the ___ book I have ever read.", options: ["gooder", "better", "best", "most good"], correct: 2 },
+        { q: "He ___ breakfast when the phone rang.", options: ["is eating", "was eating", "ate", "eats"], correct: 1 },
+        { q: "The car ___ repaired yesterday.", options: ["is", "was", "were", "did"], correct: 1 },
+        { q: "I don't mind ___ for a few minutes.", options: ["wait", "to wait", "waiting", "waited"], correct: 2 }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+    let userChoices = []; // Массив для хранения ответов
+    let startTime = Date.now();
+    let timerInterval;
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            let secondsPast = Math.floor((Date.now() - startTime) / 1000);
+            let mins = Math.floor(secondsPast / 60).toString().padStart(2, '0');
+            let secs = (secondsPast % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerHTML = `<i class="fa-regular fa-clock mr-1"></i> ${mins}:${secs}`;
+        }, 1000);
+    }
+
+    function renderQuestion() {
+        const q = quizData[currentQ];
+        document.getElementById('step-counter').innerText = `Question ${currentQ + 1} of ${quizData.length}`;
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('progress').style.width = `${(currentQ / quizData.length) * 100}%`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = "option-btn";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(idx) {
+        userChoices.push(idx); // ШАГ 3.1: Сохраняем выбор ученика
+        if (idx === quizData[currentQ].correct) score++;
+        currentQ++;
+        
+        if (currentQ < quizData.length) {
+            renderQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    // ШАГ 3.2: Новая функция завершения с отправкой в базу
+async function showResult() {
+        console.log("Тест завершен, запускаю процесс сохранения...");
+        clearInterval(timerInterval);
+        
+        let totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+        let mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        let secs = (totalSeconds % 60).toString().padStart(2, '0');
+        let finalTime = `${mins}:${secs}`;
+
+        // 1. Собираем детали теста
+        const details = quizData.map((item, idx) => ({
+            question: item.q,
+            selected: item.options[userChoices[idx]] || "No answer",
+            correct: item.options[item.correct],
+            isCorrect: userChoices[idx] === item.correct
+        }));
+
+        const studentName = localStorage.getItem('user_full_name') || "Guest Student";
+
+        // 2. ДИАГНОСТИКА: Проверяем, инициализирован ли Supabase
+        if (typeof _supabase === 'undefined') {
+            alert("Критическая ошибка: Переменная _supabase не найдена! Проверь самое начало скрипта.");
+            return;
+        }
+
+        // 3. ОТПРАВЛЯЕМ В SUPABASE
+        try {
+            console.log("Отправка данных в таблицу test_results...");
+            const { error } = await _supabase.from('test_results').insert([{
+                student_name: studentName,
+                score: score,
+                wrong_answers: quizData.length - score,
+                time_taken: finalTime,
+                answers_detail: details
+            }]);
+
+            if (error) {
+                // Если база выдаст ошибку, мы увидим её текст в алерте
+                alert("Ошибка Supabase: " + error.message);
+                console.error("Детали ошибки:", error);
+            } else {
+                console.log("Ура! Результат сохранен в базе.");
+            }
+        } catch (err) {
+            alert("Ошибка выполнения скрипта: " + err.message);
+            console.error(err);
+        }
+
+        // 4. Показываем экран финиша (твой стандартный код)
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `${score} / ${quizData.length}`;
+        document.getElementById('time-taken').innerText = `Time: ${finalTime}`;
+    }
+
+    window.onload = () => {
+        startTimer();
+        renderQuestion();
+    };
+</script>
+</body>
+</html>

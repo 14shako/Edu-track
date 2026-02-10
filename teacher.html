@@ -10,7 +10,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        aside { backdrop-filter: blur(12px); background-color: rgba(15, 23, 42, 0.9) !important; }
+        aside { 
+    backdrop-filter: blur(12px); 
+    background-color: rgba(15, 23, 42, 0.9) !important; 
+    transition: width 0.3s ease; /* Плавное сужение меню */
+}
+
+/* Это скроет заголовок EduTrack на мобилках, чтобы не мешался */
+@media (max-width: 768px) {
+    aside h2 { display: none; } 
+    .lang-btn span { display: none; } /* Скроет текст RU/EN/AZ, оставит только иконки если они есть */
+    aside { padding-left: 0 !important; padding-right: 0 !important; align-items: center; }
+}
         .online-dot { position: absolute; top: 20px; right: 20px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; z-index: 10; }
         .online-dot::after { content: ''; position: absolute; width: 100%; height: 100%; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; opacity: 0.5; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3); opacity: 0; } }
@@ -25,19 +36,39 @@
         .standard-card:hover { transform: translateY(-5px); border-color: #2563eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
         .att-table th { @apply p-4 text-left text-[10px] font-black uppercase text-slate-400 tracking-wider; }
         .att-table td { @apply p-4 border-t border-slate-50 font-bold text-slate-700; }
+@media (max-width: 768px) {
+    .nav-link { justify-content: center; }
+    header h1 { font-size: 1.5rem !important; }
+    .standard-card { padding: 1rem !important; }
+    aside .mb-10 h2, aside .lang-btn span { display: none; }
+}
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <aside class="w-64 text-white flex flex-col p-6 fixed h-full shadow-2xl z-50">
+<aside class="w-20 md:w-64 fixed h-full p-3 md:p-6 text-white flex flex-col shadow-2xl z-50">
         <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter">EDUTRACK</div>
         <nav class="flex-1 space-y-3">
-            <button onclick="tab('my-st')" id="nav-my-st" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-star mr-2"></i> <span data-i18n="menu-my">Мои ученики</span></button>
-            <button onclick="tab('att')" id="nav-att" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-calendar-check mr-2"></i> <span data-i18n="menu-att">Посещаемость</span></button>
-            <button onclick="tab('all-st')" id="nav-all-st" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-users mr-2"></i> <span data-i18n="menu-all">Все ученики</span></button>
-            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-chalkboard-user mr-2"></i> <span data-i18n="menu-tc">Коллеги</span></button>
-            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all"><i class="fa-solid fa-user mr-2"></i> <span data-i18n="menu-pr">Профиль</span></button>
-        </nav>
+<button onclick="tab('my-st')" id="nav-my-st" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-star mr-2"></i> 
+                <span class="hidden md:inline" data-i18n="menu-my">Мои ученики</span>
+            </button>
+            <button onclick="tab('att')" id="nav-att" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-calendar-check mr-2"></i> 
+                <span class="hidden md:inline" data-i18n="menu-att">Посещаемость</span>
+            </button>
+            <button onclick="tab('all-st')" id="nav-all-st" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-users mr-2"></i> 
+                <span class="hidden md:inline" data-i18n="menu-all">Все ученики</span>
+            </button>
+            <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-chalkboard-user mr-2"></i> 
+                <span class="hidden md:inline" data-i18n="menu-tc">Коллеги</span>
+            </button>
+            <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
+                <i class="fa-solid fa-user mr-2"></i> 
+                <span class="hidden md:inline" data-i18n="menu-pr">Профиль</span>
+            </button>
         
         <div class="flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
             <button onclick="setLang('RU')" id="lang-RU" class="lang-btn active p-2 text-xs font-bold text-white/50">RU</button>
@@ -48,7 +79,7 @@
         <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors"><i class="fa-solid fa-power-off mr-2"></i> <span data-i18n="logout">Выйти</span></button>
     </aside>
 
-    <main class="flex-1 ml-64 p-10">
+<main class="flex-1 ml-20 md:ml-64 p-4 md:p-10 transition-all">
         <header class="mb-12">
             <h1 id="teacher-display-name-main" class="text-4xl font-black text-slate-800 tracking-tight mb-8 uppercase italic">Кабинет учителя</h1>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -102,8 +133,8 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-3xl border border-slate-100">
-                    <table class="w-full att-table bg-white">
+<div class="overflow-x-auto rounded-3xl border border-slate-100 bg-white">
+    <table class="w-full min-w-[600px] att-table">
                         <thead class="bg-slate-50">
                             <tr>
                                 <th data-i18n="th-date">Дата записи</th>
@@ -125,7 +156,7 @@
                     <button onclick="openCreateModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl uppercase text-xs" data-i18n="btn-create-new">+ Создать</button>
                 </div>
             </div>
-            <div id="my-st-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            <div id="my-st-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8"></div>
         </div>
 
         <div id="sec-all-st" class="tab-section">
