@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Demo Lesson | EduTrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #4f46e5, #1e1b4b);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        input, select {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            transition: 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #fbbf24 !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            outline: none;
+        }
+        option { background: #1e1b4b; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card">
+        <div class="text-center mb-10">
+            <a href="index.html" class="inline-block mb-6 text-white/50 hover:text-white transition">
+                <i class="fa-solid fa-arrow-left"></i> <span data-lang-key="back">Back to Home</span>
+            </a>
+            <h1 class="text-4xl font-black mb-2" data-lang-key="demo-h1">Book Your Demo</h1>
+            <p class="text-white/60 text-sm" data-lang-key="demo-p">Start your journey to fluency today!</p>
+        </div>
+
+        <form id="demoForm" class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-[#fbbf24] mb-2" data-lang-key="label-name">Full Name</label>
+                <input type="text" id="name" required placeholder="John Doe" class="w-full px-5 py-4 rounded-2xl">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-[#fbbf24] mb-2" data-lang-key="label-phone">WhatsApp / Phone</label>
+                <input type="tel" id="phone" required placeholder="+994 -- --- -- --" class="w-full px-5 py-4 rounded-2xl">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-[#fbbf24] mb-2" data-lang-key="label-course">Choose Course</label>
+                <select id="course" class="w-full px-5 py-4 rounded-2xl">
+                    <option value="general" data-lang-key="subj-eng">General English</option>
+                    <option value="ielts" data-lang-key="subj-ielts">IELTS Prep</option>
+                    <option value="business" data-lang-key="subj-bus">Business English</option>
+                    <option value="kids">English for Kids</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-[#fbbf24] text-[#1e1b4b] py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition duration-300 shadow-xl shadow-yellow-500/20">
+                <span data-lang-key="btn-send">Claim My Free Lesson</span>
+            </button>
+        </form>
+
+        <div id="successMsg" class="hidden text-center mt-6">
+            <div class="text-5xl mb-4 text-green-400"><i class="fa-solid fa-circle-check"></i></div>
+            <h2 class="text-xl font-bold" data-lang-key="success-h">Thank you!</h2>
+            <p class="text-white/60 text-sm" data-lang-key="success-p">Our manager will contact you soon.</p>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                back: "Back to Home", "demo-h1": "Free Demo Class", "demo-p": "Try our platform and meet your teacher.",
+                "label-name": "Full Name", "label-phone": "WhatsApp / Phone", "label-course": "Course Interest",
+                "btn-send": "Claim My Free Lesson", "success-h": "Application Sent!", "success-p": "We will call you within 15 minutes.",
+                "subj-eng": "General English", "subj-ielts": "IELTS Prep", "subj-bus": "Business English"
+            },
+            ru: {
+                back: "На главную", "demo-h1": "Демо-урок", "demo-p": "Попробуйте платформу и познакомьтесь с учителем.",
+                "label-name": "Ваше имя", "label-phone": "WhatsApp / Телефон", "label-course": "Курс",
+                "btn-send": "Записаться бесплатно", "success-h": "Заявка отправлена!", "success-p": "Мы свяжемся с вами в течение 15 минут.",
+                "subj-eng": "Общий английский", "subj-ielts": "Подготовка к IELTS", "subj-bus": "Бизнес английский"
+            },
+            az: {
+                back: "Ana Səhifəyə", "demo-h1": "Ödənişsiz Demo", "demo-p": "Platformamızı yoxlayın və müəllimlə tanış olun.",
+                "label-name": "Adınız", "label-phone": "WhatsApp / Telefon", "label-course": "Kurs",
+                "btn-send": "Dərsimi bron et", "success-h": "Müraciət göndərildi!", "success-p": "Menecerimiz 15 dəqiqə ərzində sizinlə əlaqə saxlayacaq.",
+                "subj-eng": "Ümumi İngilis dili", "subj-ielts": "IELTS Hazırlığı", "subj-bus": "Biznes İngilis dili"
+            }
+        };
+
+        function applyLang() {
+            const lang = localStorage.getItem('selectedLang') || 'en';
+            const t = translations[lang];
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                el.innerText = t[key];
+            });
+        }
+
+        document.getElementById('demoForm').onsubmit = function(e) {
+            e.preventDefault();
+            this.classList.add('hidden');
+            document.getElementById('successMsg').classList.remove('hidden');
+            // Здесь можно добавить отправку данных в Supabase или Telegram
+        };
+
+        window.onload = applyLang;
+    </script>
+</body>
+</html>
