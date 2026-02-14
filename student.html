@@ -58,7 +58,7 @@
 </head>
 <body class="flex min-h-screen">
 
-    <aside class="w-64 bg-slate-900/95 text-white flex flex-col p-6 fixed h-full z-50 shadow-2xl">
+    <aside class="hidden md:flex w-64 bg-slate-900 text-white flex-col fixed h-full z-50 transition-all duration-300">
         <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter flex items-center gap-2">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs not-italic">ET</div>
             EDUTRACK
@@ -88,8 +88,26 @@
             <i class="fa-solid fa-power-off mr-2"></i> <span data-i18n="logout">Выйти</span>
         </button>
     </aside>
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 text-white flex justify-around items-center py-3 z-50 border-t border-slate-700 pb-safe">
+    <button onclick="showSection('hw')" class="nav-link active flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-hw">
+        <i class="fas fa-book-open text-lg"></i>
+        <span class="text-[10px]" data-i18n="menu-hw">Задания</span>
+    </button>
+    <button onclick="showSection('st')" class="nav-link flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-st">
+        <i class="fas fa-graduation-cap text-lg"></i>
+        <span class="text-[10px]" data-i18n="menu-st">Ученики</span>
+    </button>
+    <button onclick="showSection('tc')" class="nav-link flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-tc">
+        <i class="fas fa-chalkboard-user text-lg"></i>
+        <span class="text-[10px]" data-i18n="menu-tc">Учителя</span>
+    </button>
+    <button onclick="showSection('pr')" class="nav-link flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-pr">
+        <i class="fas fa-circle-user text-lg"></i>
+        <span class="text-[10px]" data-i18n="menu-pr">Профиль</span>
+    </button>
+</nav>
 
-    <main class="flex-1 ml-64 p-10">
+    <main class="ml-0 md:ml-64 flex-1 p-4 md:p-8 pb-24 md:pb-8 w-full">
         <div id="sec-hw" class="tab-section active">
             <h1 class="text-4xl font-black text-slate-800 mb-10 italic uppercase tracking-tight" data-i18n="menu-hw">Задания</h1>
             <div id="hw-active-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"></div>
@@ -419,13 +437,94 @@ function setLang(lang) {
     }
 }
 
-        function tab(n) {
-            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-            document.getElementById('sec-'+n).classList.add('active');
-            document.getElementById('nav-'+n).classList.add('active');
-        }
+function showSection(n) {
+    // 1. Скрываем все секции
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    // 2. Убираем активный класс со ВСЕХ кнопок (и ПК, и мобильных)
+    document.querySelectorAll('.nav-link').forEach(b => {
+        b.classList.remove('active');
+        b.classList.remove('text-blue-500'); // Для мобильных иконок
+    });
 
+    // 3. Показываем нужную секцию
+    const target = document.getElementById('sec-' + n);
+    if(target) target.classList.add('active');
+
+    // 4. Активируем кнопку в боковом меню (ПК)
+    const pcBtn = document.getElementById('nav-' + n);
+    if(pcBtn) pcBtn.classList.add('active');
+
+    // 5. Активируем кнопку в нижнем меню (Мобайл)
+    const mobBtn = document.getElementById('mob-nav-' + n);
+    if(mobBtn) {
+        mobBtn.classList.add('active');
+        mobBtn.classList.add('text-blue-500');
+    }
+}
+
+// Для совместимости со старыми вызовами onclick="tab('...')"
+function tab(n) { showSection(n); }
+
+async function saveProfile() {
+    // 1. Пытаемся найти элементы. Если их нет, используем пустую строку.
+    const nameEl = document.getElementById('edit-name');
+    const phoneEl = document.getElementById('edit-phone');
+    const zoomEl = document.getElementById('edit-zoom');
+
+    // Проверка: если даже поля имени нет, значит что-то совсем не так
+    if (!nameEl || !phoneEl) {
+        alert("Критическая ошибка: Поля формы не найдены!");
+        return;
+    }
+
+    const name = nameEl.value;
+    const phoneShort = phoneEl.value;
+    const zoom = zoomEl ? zoomEl.value : ""; // Если поля Zoom нет, берем пустую строку
+
+    if (!window.tid) {
+        alert("Ошибка: ID пользователя не найден. Перезайдите в систему.");
+        return;
+    }
+
+    // Кнопка загрузки
+    const btn = document.querySelector('button[onclick="saveProfile()"]');
+    const originalText = btn ? btn.innerText : "Обновить";
+    if(btn) {
+        btn.innerText = "⏳...";
+        btn.disabled = true;
+    }
+
+    const fullPhone = '+994' + phoneShort.replace(/\D/g, '');
+
+    try {
+        // 2. Обновляем ТОЛЬКО те поля, которые реально существуют у ученика
+        const { error } = await _supabase
+            .from('profiles')
+            .update({
+                full_name: name,
+                phone: fullPhone,
+                zoom_link: zoom
+                // Уровень (level) здесь НЕ пишем, так как ученик его не меняет
+            })
+            .eq('id', window.tid);
+
+        if (error) throw error;
+
+        alert("Профиль успешно обновлен!");
+        
+        // 3. Обновляем данные на экране через существующую функцию loadData
+        await loadData(); 
+
+    } catch (err) {
+        console.error("Save error:", err);
+        alert("Ошибка при сохранении: " + err.message);
+    } finally {
+        if(btn) {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+}
 // Функция выхода с сохранением языка
 async function logout() { 
     const currentL = localStorage.getItem('lang'); // Запоминаем текущий язык
