@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,12 +47,11 @@
                 <i class="fa-solid fa-calendar-check mr-2"></i> <span>Посещаемость</span>
             </button>
         </nav>
-
-        <div class="flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
-            <button onclick="setLang('RU')" id="l-RU" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">RU</button>
-            <button onclick="setLang('EN')" id="l-EN" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">EN</button>
-            <button onclick="setLang('AZ')" id="l-AZ" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">AZ</button>
-        </div>
+<div class="hidden flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
+    <button onclick="setLang('RU')" id="l-RU" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">RU</button>
+    <button onclick="setLang('EN')" id="l-EN" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">EN</button>
+    <button onclick="setLang('AZ')" id="l-AZ" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">AZ</button>
+</div>
 
         <button onclick="logout()" class="p-3 text-red-400 hover:bg-slate-700 rounded-xl text-left transition">
             <i class="fa-solid fa-right-from-bracket mr-2"></i> <span data-i18n="logout">Выйти</span>
@@ -185,19 +184,19 @@
 
     <div id="userModal" class="modal">
         <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-t-[10px] border-blue-600">
-            <h2 class="text-2xl font-black mb-6 text-slate-800 uppercase italic">Новый пользователь</h2>
+            <h2 class="text-2xl font-black mb-6 text-slate-800 uppercase italic">NEW USER</h2>
             <div class="space-y-4">
                 <select id="reg_role" onchange="toggleRoleFields()" class="w-full p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl font-bold text-blue-600 outline-none">
-                    <option value="student">Ученик</option>
-                    <option value="teacher">Учитель</option>
-                    <option value="admin">Администратор</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="admin">Admin</option>
                 </select>
-                <input type="text" id="reg_name" placeholder="Имя Фамилия" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
+                <input type="text" id="reg_name" placeholder="Name and Surname" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
                 <input type="email" id="reg_email" placeholder="Email" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
-                <input type="password" id="reg_pass" placeholder="Пароль" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
+                <input type="password" id="reg_pass" placeholder="Password" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
                 <div id="student-only-fields">
                     <select id="reg_lvl" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-slate-500 outline-none">
-                        <option value="" disabled selected>Уровень</option>
+                        <option value="" disabled selected>Level</option>
                         <option value="A1">A1</option><option value="A2">A2</option>
                         <option value="B1">B1</option><option value="B2">B2</option>
                         <option value="C1">C1</option><option value="C2">C2</option>
@@ -205,15 +204,15 @@
                 </div>
                 <div id="subject-field">
                     <select id="reg_subject" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-slate-500 outline-none">
-                        <option value="" disabled selected>Предмет</option>
-                        <option value="English">Английский</option>
+                        <option value="" disabled selected>Subject</option>
+                        <option value="English">English</option>
                         <option value="Math">Математика</option>
                         <option value="Programming">Программирование</option>
                         <option value="Art">Рисование</option>
                     </select>
                 </div>
-                <button onclick="createUser()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-blue-600 transition shadow-lg">Создать</button>
-                <button onclick="closeModal()" class="w-full text-slate-400 font-bold mt-2">Отмена</button>
+                <button onclick="createUser()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black uppercase tracking-widest hover:bg-blue-600 transition shadow-lg">Create</button>
+                <button onclick="closeModal()" class="w-full text-slate-400 font-bold mt-2">Cancel</button>
             </div>
         </div>
     </div>
@@ -270,15 +269,81 @@
         let usersArr = [];
         let scheduleArr = [];
 
-        function showPage(pageId, navBtn) {
-            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-            const target = document.getElementById('page-' + pageId);
-            if (target) target.classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            if (navBtn) navBtn.classList.add('active');
-            if(pageId === 'attendance') loadAttendanceForAdmin();
-            if(pageId === 'test-results') loadTestResults();
-        }
+function showPage(pageId, navBtn) {
+    // 1. Скрываем все секции (в твоем коде у них класс .page-section)
+    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+    
+    // 2. Показываем нужную страницу (добавляем 'page-' так как у тебя такие ID в HTML)
+    const target = document.getElementById('page-' + pageId);
+    if (target) {
+        target.classList.add('active');
+    } else {
+        // Если вдруг ID без приставки page-
+        const altTarget = document.getElementById(pageId);
+        if (altTarget) altTarget.classList.add('active');
+    }
+
+    // 3. Переключаем активную кнопку в меню
+    document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+    if (navBtn) {
+        navBtn.classList.add('active');
+    } else {
+        // Если кнопка не передана, находим её по атрибуту onclick
+        const autoBtn = document.querySelector(`[onclick*="'${pageId}'"]`);
+        if (autoBtn) autoBtn.classList.add('active');
+    }
+
+    // 4. САМОЕ ГЛАВНОЕ: Загрузка данных
+    if (pageId === 'attendance') {
+        console.log("Загружаю посещаемость...");
+        loadAllAttendance(); // Вызываем новую функцию, которую мы написали
+    }
+    
+    if (pageId === 'test-results') {
+        loadTestResults();
+    }
+}
+function showSection(id) {
+    // 1. Прячем все разделы
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('hidden');
+    });
+
+    // 2. Показываем тот, на который нажали
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.remove('hidden');
+    }
+
+    // 3. Если открыли посещаемость — загружаем данные
+    if (id === 'attendance-section') {
+        loadAllAttendance(); 
+    }
+    
+    // 4. (Опционально) Если открыли статистику — можно обновить и её
+    if (id === 'stats-section') {
+        loadData();
+    }
+}
+// Функция для переключения вкладок в админ-панели
+function showSection(sectionId) {
+    // 1. Находим все разделы (статистика, учителя, ученики, посещаемость)
+    const sections = document.querySelectorAll('.content-section');
+    
+    // 2. Скрываем все разделы
+    sections.forEach(s => s.classList.add('hidden'));
+
+    // 3. Показываем тот, на который нажали
+    const target = document.getElementById(sectionId);
+    if (target) {
+        target.classList.remove('hidden');
+    }
+
+    // 4. ЕСЛИ открыли раздел посещаемости — сразу грузим свежие данные
+    if (sectionId === 'attendance-section') {
+        loadAllAttendance(); 
+    }
+}
 
         async function loadData() {
             const { data: p } = await _supabase.from('profiles').select('*');
@@ -291,26 +356,73 @@
                 renderTeachers(usersArr, scheduleArr);
                 renderStudents(usersArr, scheduleArr);
                 renderConnections(scheduleArr);
-                setLang(localStorage.getItem('admin_lang') || 'RU');
+                setLang(localStorage.getItem('admin_lang') || 'EN');
             }
         }
 
-        async function loadAttendanceForAdmin() {
-            const { data, error } = await _supabase.from('attendance').select('*').order('date', { ascending: false });
-            if(error || !data) return;
-            document.getElementById('admin-attendance-list').innerHTML = data.map(row => {
-                const t = usersArr.find(u => u.id === row.teacher_id) || { full_name: '---' };
-                const s = usersArr.find(u => u.id === row.student_id) || { full_name: '---' };
-                let badge = row.status === 'present' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
-                return `<tr class="hover:bg-slate-50 border-b">
-                    <td class="p-4 font-bold">${t.full_name}</td>
-                    <td class="p-4">${s.full_name}</td>
-                    <td class="p-4"><span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[10px] font-black">${t.subject || ''}</span></td>
-                    <td class="p-4 text-xs text-slate-400">${new Date(row.date).toLocaleString()}</td>
-                    <td class="p-4"><span class="${badge} px-2 py-1 rounded font-black text-[10px] uppercase">${row.status}</span></td>
-                </tr>`;
-            }).join('');
+async function loadAttendanceForAdmin() {
+    const list = document.getElementById('admin-attendance-list');
+    if (!list) return;
+
+    list.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">Загрузка...</td></tr>';
+
+    try {
+        const { data, error } = await _supabase
+            .from('attendance')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            list.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">Записей пока нет</td></tr>';
+            return;
         }
+
+        list.innerHTML = data.map(row => {
+            // Ищем учителя и ученика в массиве usersArr, который загружается при старте страницы
+            const t = usersArr.find(u => u.id === row.teacher_id) || { full_name: 'Учитель' };
+            const s = usersArr.find(u => u.id === row.student_id) || { full_name: 'Ученик' };
+            
+            // Настройка цветов статуса
+            const colors = {
+                'present': 'bg-green-100 text-green-700',
+                'absent': 'bg-red-100 text-red-700',
+                'late': 'bg-orange-100 text-orange-700',
+                'transferred': 'bg-blue-100 text-blue-700'
+            };
+            const badgeClass = colors[row.status] || "bg-slate-100 text-slate-700";
+
+            return `
+            <tr class="hover:bg-slate-50 border-b transition-colors">
+                <td class="p-4 font-bold text-slate-700 text-xs">${t.full_name}</td>
+                <td class="p-4 text-slate-600 text-xs">${s.full_name}</td>
+                <td class="p-4">
+                    <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[10px] font-black uppercase">
+                        ${t.subject || 'English'}
+                    </span>
+                </td>
+                <td class="p-4 text-[10px] text-slate-400">
+                    ${new Date(row.date || row.created_at).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'})}
+                </td>
+                <td class="p-4">
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="${badgeClass} px-2 py-0.5 rounded font-black text-[9px] uppercase tracking-tighter">
+                            ${row.status}
+                        </span>
+                        ${row.details ? `
+                            <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 rounded border border-slate-200 shadow-sm">
+                                ${row.details}
+                            </span>` : ''}
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+
+    } catch (e) {
+        list.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-500">${e.message}</td></tr>`;
+    }
+}
 
         async function loadTestResults() {
             const { data, error } = await _supabase.from('test_results').select('*').order('created_at', { ascending: false });
@@ -398,7 +510,7 @@ function renderTeachers(arr, schedule) {
                 <tr class="border-b">
                     <td class="p-4 font-bold">${u.full_name}</td>
                     <td class="p-4 text-xs font-black text-slate-400">${u.level || '---'}</td>
-                    <td class="p-4 text-[10px] font-black uppercase">${schedule.some(s => s.student_id === u.id) ? 'Связан' : 'Свободен'}</td>
+                    <td class="p-4 text-[10px] font-black uppercase">${schedule.some(s => s.student_id === u.id) ? 'connected' : 'free'}</td>
                     <td class="p-4 text-right"><button onclick="deleteUser('${u.id}')" class="text-red-300"><i class="fa-solid fa-trash-can"></i></button></td>
                 </tr>`).join('');
         }
@@ -500,6 +612,81 @@ window.toggleDemoPermission = async function(userId, currentStatus) {
         }
     }
 }
+async function loadAllAttendance() {
+    const list = document.getElementById('admin-attendance-list');
+    if (!list) return;
+
+    list.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">Загрузка данных...</td></tr>';
+
+    try {
+        const { data, error } = await _supabase
+            .from('attendance')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        list.innerHTML = ''; 
+
+        data.forEach(item => {
+            const teacher = usersArr.find(u => u.id === item.teacher_id) || { full_name: 'Teacher' };
+            const student = usersArr.find(u => u.id === item.student_id) || { full_name: 'Student' };
+
+            const colors = {
+                'present': 'bg-green-100 text-green-700',
+                'absent': 'bg-red-100 text-red-700',
+                'late': 'bg-orange-100 text-orange-700',
+                'transferred': 'bg-blue-100 text-blue-700'
+            };
+            const badgeClass = colors[item.status] || "bg-slate-100 text-slate-700";
+
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-50 border-b transition-colors";
+            
+            row.innerHTML = `
+                <td class="p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-chalkboard-teacher text-slate-300 text-[12px]"></i>
+                        <span class="font-black text-slate-700 text-[13px] uppercase tracking-tighter">${teacher.full_name}</span>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-user-graduate text-slate-300 text-[12px]"></i>
+                        <span class="font-bold text-slate-600 text-[13px]">${student.full_name}</span>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded text-[10px] font-black uppercase italic shadow-sm">
+                        English
+                    </span>
+                </td>
+                <td class="p-4 text-[11px] text-slate-400 font-bold text-center">
+                    <i class="far fa-calendar-alt mr-1 text-slate-300"></i>
+                    ${new Date(item.date || item.created_at).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}
+                </td>
+                <td class="p-4">
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Status</span>
+                        <span class="${badgeClass} px-3 py-1 rounded font-black text-[10px] uppercase tracking-tighter shadow-sm">
+                            ${item.status}
+                        </span>
+                        ${item.details ? `
+                            <span class="text-[10px] font-black text-blue-500 bg-white border border-blue-100 px-2 py-0.5 rounded shadow-sm mt-1 flex items-center gap-1">
+                                <i class="fas fa-clock text-[9px]"></i>
+                                ${item.details}
+                            </span>` : ''}
+                    </div>
+                </td>
+            `;
+            list.appendChild(row);
+        });
+
+    } catch (err) {
+        console.error(err);
+        list.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-500">${err.message}</td></tr>`;
+    }
+}
 
         async function logout() { 
             await _supabase.auth.signOut(); 
@@ -516,6 +703,22 @@ async function toggleDemoPermission(teacherId, currentStatus) {
 }
 
         window.onload = loadData;
+// Добавьте это в самый низ скрипта admin.html
+_supabase
+    .channel('schema-db-changes')
+    .on(
+        'postgres_changes',
+        {
+            event: 'INSERT', // Слушаем только новые записи
+            schema: 'public',
+            table: 'attendance'
+        },
+        (payload) => {
+            console.log('Новая посещаемость от учителя!', payload);
+            loadAllAttendance(); // Обновляем таблицу автоматически
+        }
+    )
+    .subscribe();
     </script>
 </body>
 </html>

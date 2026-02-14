@@ -64,6 +64,11 @@
                 <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-login">Войти</button>
             </p>
         </div>
+<div class="text-center mt-1">
+    <button onclick="openResetModal()" class="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-700">
+        Forgot password?
+    </button>
+</div>
 
         <div id="loader" class="hidden text-center py-4">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
@@ -250,13 +255,115 @@ async function handleLogin() {
 }
 
 // 3. ФУНКЦИЯ ЛОАДЕРА (Обязательно оставь, иначе login упадет с ошибкой)
-function showLoader(show) {
-    document.getElementById('loader').classList.toggle('hidden', !show);
-    document.getElementById('login-form').classList.toggle('hidden', show);
-    document.getElementById('register-form').classList.add('hidden');
+// ... ваш предыдущий код (supabase init и т.д.) ...
+
+    function showLoader(show) {
+        const loader = document.getElementById('loader');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        if(loader) loader.classList.toggle('hidden', !show);
+        if(loginForm) loginForm.classList.toggle('hidden', show);
+        if(registerForm) registerForm.classList.add('hidden');
+    }
+
+    window.onload = () => { 
+        setLang(localStorage.getItem('selectedLang') || 'en'); 
+    };
+
+    // --- ОБЯЗАТЕЛЬНО ДОБАВЬТЕ ЭТИ ФУНКЦИИ ВНУТРЬ ТЕГА <SCRIPT> ---
+    
+    function openResetModal() {
+        document.getElementById('reset-modal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+        document.getElementById('reset-modal').classList.add('hidden');
+    }
+
+    async function sendResetLink() {
+        const email = document.getElementById('reset-email').value;
+        const btn = document.getElementById('btn-reset');
+
+        if (!email) return alert("Please enter your email!");
+
+        btn.innerText = "SENDING...";
+        btn.disabled = true;
+
+        try {
+            const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+                // redirectTo: https://14shako.github.io/Edu-track/
+                redirectTo: window.location.origin + window.location.pathname,
+            });
+
+            if (error) throw error;
+
+            alert("Success! Check your email for the recovery link.");
+            closeResetModal();
+        } catch (err) {
+            alert("Error: " + err.message);
+        } finally {
+            btn.innerText = "SEND RESET LINK";
+            btn.disabled = false;
+        }
+    }
+// Функция для проверки, не пришел ли пользователь по ссылке для сброса пароля
+async function handlePasswordReset() {
+    // 1. Проверяем наличие хэша в URL (там Supabase передает токены)
+    const hash = window.location.hash;
+
+    if (hash && hash.includes("type=recovery")) {
+        // 2. Спрашиваем новый пароль (можно сделать через prompt для простоты или красивое окно)
+        const newPassword = prompt("Please enter your NEW password:");
+
+        if (newPassword && newPassword.length >= 6) {
+            try {
+                // 3. Отправляем новый пароль в Supabase
+                const { error } = await _supabase.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
+
+                alert("Success! Password updated. Now you can log in with your new password.");
+                
+                // Очищаем хэш в адресе и обновляем страницу, чтобы форма логина стала чистой
+                window.location.hash = "";
+                window.location.href = window.location.origin + window.location.pathname;
+
+            } catch (err) {
+                alert("Error updating password: " + err.message);
+            }
+        } else if (newPassword) {
+            alert("Password must be at least 6 characters!");
+        }
+    }
 }
 
-        window.onload = () => { setLang(localStorage.getItem('selectedLang') || 'en'); };
-    </script>
+// Запускаем проверку сразу при загрузке страницы
+window.addEventListener('load', handlePasswordReset);
+// И на случай, если страница уже открыта, а хэш изменился
+window.addEventListener('hashchange', handlePasswordReset);
+</script>
+
+<div id="reset-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[999]">
+    <div class="bg-white p-8 rounded-[35px] max-w-sm w-full shadow-2xl border border-slate-100">
+        <h3 class="font-black text-2xl text-slate-800 mb-2">Reset Password</h3>
+        <p class="text-slate-500 text-xs mb-6 leading-relaxed">Enter your email and we'll send you a secure link to restore access.</p>
+        
+        <input type="email" id="reset-email" placeholder="Your Email" 
+               class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl mb-4 outline-none focus:ring-2 ring-blue-500 text-sm">
+        
+        <button onclick="sendResetLink()" id="btn-reset" 
+                class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-[2px] shadow-lg hover:bg-blue-700 transition-all">
+            Send Reset Link
+        </button>
+        
+        <button onclick="closeResetModal()" class="w-full mt-4 text-slate-400 text-[9px] font-black uppercase tracking-widest">
+            Cancel
+        </button>
+    </div>
+</div>
+
 </body>
 </html>

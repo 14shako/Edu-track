@@ -171,7 +171,11 @@ const translations = {
         "no-zoom": "Zoom не указан",
         "zoom-teacher": "Zoom Урока",
         "zoom-student": "Zoom Ученика",
-        "empty-hw": "Заданий пока нет. Отдыхайте!"
+        "empty-hw": "Заданий пока нет. Отдыхайте!",
+        "archive-empty": "Архив пуст",
+        "due-date": "Срок до",
+        "btn-done": "Выполнено",
+        "download": "Скачать материалы"
     },
     AZ: {
         "menu-hw": "Tapşırıqlar", 
@@ -191,7 +195,11 @@ const translations = {
         "no-zoom": "Zoom linki yoxdur",
         "zoom-teacher": "Dərs Zoom-u",
         "zoom-student": "Tələbə Zoom-u",
-        "empty-hw": "Hələlik tapşırıq yoxdur. İstirahət edin!"
+        "empty-hw": "Hələlik tapşırıq yoxdur. İstirahət edin!",
+        "archive-empty": "Arxiv boşdur",
+        "due-date": "Tarixinə qədər",
+        "btn-done": "Tamamlandı",
+        "download": "Materialları yüklə"
     },
     EN: {
         "menu-hw": "Homework", 
@@ -211,7 +219,11 @@ const translations = {
         "no-zoom": "No Zoom link",
         "zoom-teacher": "Lesson Zoom",
         "zoom-student": "Student Zoom",
-        "empty-hw": "No tasks yet. Enjoy your time!"
+        "empty-hw": "No tasks yet. Enjoy your time!",
+        "archive-empty": "Archive is empty",
+        "due-date": "Due date",
+        "btn-done": "Done",
+        "download": "Download Materials"
     }
 };
 
@@ -241,8 +253,17 @@ const translations = {
             const { data: allUsers } = await _supabase.from('profiles').select('*');
             renderLists(allUsers);
 
-            const { data: hws } = await _supabase.from('homework').select('*').eq('student_id', myId);
-            renderHw(hws);
+// Загружаем данные: СНАЧАЛА НОВЫЕ (по дате создания)
+const { data: hws, error: err2 } = await _supabase
+    .from('homework')
+    .select('*')
+    .eq('student_id', myId)
+    .order('created_at', { ascending: false }); 
+
+// Если ошибок нет, рисуем карточки
+if (!err2) {
+    renderHw(hws);
+}
         }
 
 function renderLists(users) {
@@ -306,45 +327,72 @@ function renderLists(users) {
     if (tcList) tcList.innerHTML = users.filter(u => u.role === 'teacher').map(u => createCard(u, true)).join('');
 }
 
-        function renderHw(hws) {
-            const active = hws?.filter(h => h.status === 'active') || [];
-            if(active.length === 0) {
-                document.getElementById('hw-active-list').innerHTML = `
-                    <div class="col-span-full py-20 text-center">
-                        <i class="fa-solid fa-mug-hot text-5xl text-slate-200 mb-4"></i>
-                        <p class="text-slate-400 font-bold italic">${translations[currentLang]['empty-hw']}</p>
-                    </div>`;
-            } else {
-                document.getElementById('hw-active-list').innerHTML = active.map(h => `
-                    <div class="bg-white p-8 rounded-[35px] border-l-[12px] border-blue-600 shadow-xl transition-all hover:scale-[1.02]">
-                        <h3 class="font-black text-xl mb-2 text-slate-800">${h.title}</h3>
-                        <p class="text-slate-500 mb-6 font-medium">${h.content}</p>
-                        <button onclick="updateStatus('${h.id}', 'done')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 transition-all active:scale-95">Выполнено</button>
+function renderHw(hws) {
+    const container = document.getElementById('hw-active-list');
+    const doneContainer = document.getElementById('hw-done-list');
+    
+    // Берем текущий язык. Если он не задан, ставим 'EN'
+    const lang = typeof currentLang !== 'undefined' ? currentLang : 'EN';
+
+    const active = hws?.filter(h => !h.is_completed) || [];
+    const done = hws?.filter(h => h.is_completed) || [];
+
+    if (container) {
+        if (active.length === 0) {
+            // Используем empty-hw из твоего словаря
+            container.innerHTML = `<div class="col-span-full py-10 text-center opacity-50">${translations[lang]['empty-hw'] || 'No tasks'}</div>`;
+        } else {
+            container.innerHTML = active.map(h => `
+                <div class="bg-white p-8 rounded-[35px] border-l-[12px] border-blue-600 shadow-xl mb-4">
+                    <h3 class="font-black text-xl">${h.title}</h3>
+                    <div class="text-rose-500 font-bold text-[11px] mt-2 uppercase">
+                        <i class="fa-solid fa-calendar"></i> 
+                        ${translations[lang]['due-date'] || 'Due'}: ${h.due_date ? new Date(h.due_date).toLocaleDateString() : '—'}
                     </div>
-                `).join('');
-            }
-            
-            document.getElementById('hw-done-list').innerHTML = hws?.filter(h => h.status === 'done').map(h => `
-                <div class="bg-white p-6 rounded-[30px] border border-slate-100 opacity-70"><h3 class="font-bold text-slate-400 line-through">${h.title}</h3></div>
-            `).join('') || "";
-        }
+                    <p class="my-6 text-slate-600">${h.content || ''}</p>
+                    
+                    ${h.file_url ? `
+                        <a href="${h.file_url}" target="_blank" class="block w-full mb-4 p-4 bg-blue-50 text-blue-600 rounded-2xl text-center font-black text-xs uppercase border border-blue-100">
+                            ${translations[lang]['download'] || 'Download'}
+                        </a>
+                    ` : ''}
 
-        async function updateStatus(id, status) {
-            await _supabase.from('homework').update({ status }).eq('id', id);
-            loadData();
+                    <button onclick="updateStatus('${h.id}')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs">
+                        <i class="fa-solid fa-check mr-2"></i> 
+                        ${translations[lang]['btn-done'] || 'Done'}
+                    </button>
+                </div>
+            `).join('');
         }
+    }
 
-        async function saveProfile() {
-            const phoneVal = document.getElementById('edit-phone').value.replace(/\D/g, '');
-            const phone = phoneVal ? "+994" + phoneVal : null;
+    if (doneContainer) {
+        doneContainer.innerHTML = done.length ? done.map(h => `
+            <div class="bg-white p-5 rounded-[25px] border border-slate-100 opacity-60 flex justify-between items-center mb-3">
+                <span class="font-bold text-slate-500 line-through">${h.title}</span>
+                <i class="fa-solid fa-circle-check text-green-500"></i>
+            </div>
+        `).join('') : `<p class="text-center opacity-50">${translations[lang]['archive'] || 'Archive'}</p>`;
+    }
+}
 
-            const { error } = await _supabase.from('profiles').update({
-                full_name: document.getElementById('edit-name').value,
-                phone: phone,
-                zoom_link: document.getElementById('edit-zoom').value
-            }).eq('id', myId);
-            if(!error) { alert(currentLang === 'AZ' ? "Məlumat yeniləndi!" : "Данные обновлены!"); loadData(); }
-        }
+async function updateStatus(id) {
+    console.log("Обновляем ID:", id);
+    
+    // Обновляем именно колонку is_completed
+    const { error } = await _supabase
+        .from('homework')
+        .update({ is_completed: true }) 
+        .eq('id', id);
+
+    if (error) {
+        console.error("Ошибка Supabase:", error);
+    } else {
+        console.log("Успешно! Перезагружаем список...");
+        // Важно вызвать именно loadData, чтобы hws перекачались из базы
+        await loadData(); 
+    }
+}
 
 function setLang(lang) {
     currentLang = lang;
