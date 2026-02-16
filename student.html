@@ -54,11 +54,72 @@
         .lang-btn.active { color: #3b82f6 !important; border-bottom: 2px solid #3b82f6; opacity: 1 !important; }
         
         aside { backdrop-filter: blur(10px); }
+        /* Mobile-specific styles: keep desktop unchanged, only apply under 768px */
+        #burger-btn { display: none; }
+
+        .table-wrapper { -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 768px) {
+            /* Sidebar: hidden by default on mobile, slides in when `.mobile-open` added */
+            aside {
+                transform: translateX(-100%);
+                transition: transform 0.28s ease;
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                z-index: 60;
+                width: 16rem; /* visually similar to w-64 */
+                margin: 0;
+            }
+
+            aside.mobile-open { transform: translateX(0); }
+
+            /* Overlay behind the sidebar (but above main content) */
+            #mobile-overlay { display: none; }
+            #mobile-overlay.block { display: block; }
+
+            /* Main content: remove left margin so it fills width on mobile */
+            main { margin-left: 0 !important; padding: 1rem !important; }
+
+            /* Make cards more compact on small screens */
+            .standard-card { padding: 1rem; border-radius: 20px; }
+
+            /* Burger button: visible on mobile, fixed top-left */
+            #burger-btn {
+                display: flex;
+                position: fixed;
+                left: 0.75rem;
+                top: 0.75rem;
+                z-index: 70;
+                background: white;
+                border-radius: 10px;
+                width: 44px;
+                height: 44px;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            }
+
+            /* Stack phone input parts inside profile */
+            #sec-pr .flex.gap-2 { flex-direction: column; }
+            #sec-pr .flex.gap-2 select, #sec-pr .flex.gap-2 input { width: 100% !important; }
+
+            /* Ensure images and cards fit */
+            img, .standard-card img { max-width: 100%; height: auto; }
+
+            /* Tables: wrap into horizontal scroll container; also ensure tables don't overflow page */
+            .table-wrapper { overflow-x: auto; width: 100%; }
+            table { width: 100%; border-collapse: collapse; }
+
+            /* Prevent page-level horizontal scroll (tables scroll internally) */
+            body { overflow-x: hidden; }
+        }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <aside class="hidden md:flex w-64 bg-slate-900 text-white flex-col fixed h-full z-50 transition-all duration-300">
+    <aside class="w-64 bg-slate-900/95 text-white flex flex-col p-6 fixed h-full z-50 shadow-2xl">
         <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter flex items-center gap-2">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs not-italic">ET</div>
             EDUTRACK
@@ -88,26 +149,13 @@
             <i class="fa-solid fa-power-off mr-2"></i> <span data-i18n="logout">Выйти</span>
         </button>
     </aside>
-<nav class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 text-white flex justify-around items-center py-3 z-50 border-t border-slate-700 pb-safe">
-    <button onclick="showSection('hw')" class="nav-link active flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-hw">
-        <i class="fas fa-book-open text-lg"></i>
-        <span class="text-[10px]" data-i18n="menu-hw">Задания</span>
-    </button>
-    <button onclick="showSection('st')" class="nav-link flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-st">
-        <i class="fas fa-graduation-cap text-lg"></i>
-        <span class="text-[10px]" data-i18n="menu-st">Ученики</span>
-    </button>
-    <button onclick="showSection('tc')" class="nav-link flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-tc">
-        <i class="fas fa-chalkboard-user text-lg"></i>
-        <span class="text-[10px]" data-i18n="menu-tc">Учителя</span>
-    </button>
-    <button onclick="showSection('pr')" class="nav-link flex flex-col items-center gap-1 text-slate-400 w-full" id="mob-nav-pr">
-        <i class="fas fa-circle-user text-lg"></i>
-        <span class="text-[10px]" data-i18n="menu-pr">Профиль</span>
-    </button>
-</nav>
 
-    <main class="ml-0 md:ml-64 flex-1 p-4 md:p-8 pb-24 md:pb-8 w-full">
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/40 z-40" onclick="closeMobileMenu()"></div>
+
+    <main class="flex-1 ml-64 p-10">
+        <button id="burger-btn" aria-label="Open menu" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
         <div id="sec-hw" class="tab-section active">
             <h1 class="text-4xl font-black text-slate-800 mb-10 italic uppercase tracking-tight" data-i18n="menu-hw">Задания</h1>
             <div id="hw-active-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"></div>
@@ -141,7 +189,20 @@
                     </div>
                     <div class="space-y-6">
                         <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-name">Имя Фамилия</label><input type="text" id="edit-name" class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 focus:bg-white transition-all outline-none text-slate-700"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-phone">Телефон</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400">+994</span><input type="text" id="edit-phone" maxlength="9" class="w-full p-4 pl-16 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div></div>
+<div>
+    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-phone">Number</label>
+    <div class="flex gap-2">
+        <select id="edit-country-code" class="w-1/3 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none appearance-none cursor-pointer">
+            <option value="+994">+994 🇦🇿</option>
+            <option value="+7">+7 🇷🇺</option>
+            <option value="+90">+90 🇹🇷</option>
+            <option value="+1">+1 🇺🇸</option>
+            <option value="+44">+44 🇬🇧</option>
+        </select>
+        
+        <input type="text" id="edit-phone" placeholder="501234567" class="w-2/3 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none">
+    </div>
+</div>
                         <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Zoom Link</label><input type="url" id="edit-zoom" placeholder="https://zoom.us/j/..." class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div>
                         <button onclick="saveProfile()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95" data-i18n="btn-save">Обновить</button>
                     </div>
@@ -253,36 +314,54 @@ const translations = {
             await loadData();
         }
 
-        async function loadData() {
-            const { data: p } = await _supabase.from('profiles').select('*').eq('id', myId).single();
-            if(p) {
-                document.getElementById('display-name').innerText = p.full_name || "---";
-                document.getElementById('edit-name').value = p.full_name || "";
-                document.getElementById('edit-phone').value = p.phone ? p.phone.replace('+994', '') : "";
-                document.getElementById('edit-zoom').value = p.zoom_link || "";
-                document.getElementById('u-email').innerText = p.username || "";
-                document.getElementById('u-level').innerText = p.level || "A1";
-                document.getElementById('prof-initials').innerText = p.full_name ? p.full_name[0] : "?";
+async function loadData() {
+    const { data: p } = await _supabase.from('profiles').select('*').eq('id', myId).single();
+    if(p) {
+        document.getElementById('display-name').innerText = p.full_name || "---";
+        document.getElementById('edit-name').value = p.full_name || "";
+        
+        // --- ВОТ ЭТОТ БЛОК МЫ ЗАМЕНИЛИ (Логика разделения кода и номера) ---
+        if (p.phone) {
+            const codes = ["+994", "+7", "+90", "+1", "+44"];
+            let foundCode = "+994"; // по умолчанию
+            let restOfPhone = p.phone;
+
+            for (let code of codes) {
+                if (p.phone.startsWith(code)) {
+                    foundCode = code;
+                    restOfPhone = p.phone.replace(code, '');
+                    break;
+                }
             }
-
-            const { data: link } = await _supabase.from('schedule').select('teacher:teacher_id(full_name)').eq('student_id', myId).maybeSingle();
-            if(link && link.teacher) document.getElementById('u-teacher-name').innerText = link.teacher.full_name;
-
-            const { data: allUsers } = await _supabase.from('profiles').select('*');
-            renderLists(allUsers);
-
-// Загружаем данные: СНАЧАЛА НОВЫЕ (по дате создания)
-const { data: hws, error: err2 } = await _supabase
-    .from('homework')
-    .select('*')
-    .eq('student_id', myId)
-    .order('created_at', { ascending: false }); 
-
-// Если ошибок нет, рисуем карточки
-if (!err2) {
-    renderHw(hws);
-}
+            // Ставим код в select, а остаток номера в input
+            if(document.getElementById('edit-country-code')) document.getElementById('edit-country-code').value = foundCode;
+            document.getElementById('edit-phone').value = restOfPhone;
         }
+        // ---------------------------------------------------------------
+
+        document.getElementById('edit-zoom').value = p.zoom_link || "";
+        document.getElementById('u-email').innerText = p.username || "";
+        document.getElementById('u-level').innerText = p.level || "A1";
+        document.getElementById('prof-initials').innerText = p.full_name ? p.full_name[0] : "?";
+    }
+
+    // Остальной код функции (учителя, домашки) оставляем как был!
+    const { data: link } = await _supabase.from('schedule').select('teacher:teacher_id(full_name)').eq('student_id', myId).maybeSingle();
+    if(link && link.teacher) document.getElementById('u-teacher-name').innerText = link.teacher.full_name;
+
+    const { data: allUsers } = await _supabase.from('profiles').select('*');
+    renderLists(allUsers);
+
+    const { data: hws, error: err2 } = await _supabase
+        .from('homework')
+        .select('*')
+        .eq('student_id', myId)
+        .order('created_at', { ascending: false }); 
+
+    if (!err2) {
+        renderHw(hws);
+    }
+}
 
 function renderLists(users) {
     const stList = document.getElementById('st-list');
@@ -437,82 +516,58 @@ function setLang(lang) {
     }
 }
 
-function showSection(n) {
-    // 1. Скрываем все секции
-    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-    // 2. Убираем активный класс со ВСЕХ кнопок (и ПК, и мобильных)
-    document.querySelectorAll('.nav-link').forEach(b => {
-        b.classList.remove('active');
-        b.classList.remove('text-blue-500'); // Для мобильных иконок
-    });
-
-    // 3. Показываем нужную секцию
-    const target = document.getElementById('sec-' + n);
-    if(target) target.classList.add('active');
-
-    // 4. Активируем кнопку в боковом меню (ПК)
-    const pcBtn = document.getElementById('nav-' + n);
-    if(pcBtn) pcBtn.classList.add('active');
-
-    // 5. Активируем кнопку в нижнем меню (Мобайл)
-    const mobBtn = document.getElementById('mob-nav-' + n);
-    if(mobBtn) {
-        mobBtn.classList.add('active');
-        mobBtn.classList.add('text-blue-500');
-    }
-}
-
-// Для совместимости со старыми вызовами onclick="tab('...')"
-function tab(n) { showSection(n); }
+        function tab(n) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-'+n).classList.add('active');
+            document.getElementById('nav-'+n).classList.add('active');
+        }
 
 async function saveProfile() {
-    // 1. Пытаемся найти элементы. Если их нет, используем пустую строку.
     const nameEl = document.getElementById('edit-name');
     const phoneEl = document.getElementById('edit-phone');
+    const countryCodeEl = document.getElementById('edit-country-code');
     const zoomEl = document.getElementById('edit-zoom');
 
-    // Проверка: если даже поля имени нет, значит что-то совсем не так
-    if (!nameEl || !phoneEl) {
+    if (!nameEl || !phoneEl || !countryCodeEl) {
         alert("Критическая ошибка: Поля формы не найдены!");
         return;
     }
 
     const name = nameEl.value;
-    const phoneShort = phoneEl.value;
-    const zoom = zoomEl ? zoomEl.value : ""; // Если поля Zoom нет, берем пустую строку
+    const zoom = zoomEl ? zoomEl.value : "";
+    
+    // ПРАВИЛЬНЫЙ СБОР ТЕЛЕФОНА (один раз)
+    const countryCode = countryCodeEl.value;
+    const digitsOnly = phoneEl.value.replace(/\D/g, '');
+    const fullPhone = countryCode + digitsOnly;
 
     if (!window.tid) {
         alert("Ошибка: ID пользователя не найден. Перезайдите в систему.");
         return;
     }
 
-    // Кнопка загрузки
     const btn = document.querySelector('button[onclick="saveProfile()"]');
     const originalText = btn ? btn.innerText : "Обновить";
+    
     if(btn) {
         btn.innerText = "⏳...";
         btn.disabled = true;
     }
 
-    const fullPhone = '+994' + phoneShort.replace(/\D/g, '');
-
     try {
-        // 2. Обновляем ТОЛЬКО те поля, которые реально существуют у ученика
         const { error } = await _supabase
             .from('profiles')
             .update({
                 full_name: name,
                 phone: fullPhone,
                 zoom_link: zoom
-                // Уровень (level) здесь НЕ пишем, так как ученик его не меняет
             })
             .eq('id', window.tid);
 
         if (error) throw error;
 
         alert("Профиль успешно обновлен!");
-        
-        // 3. Обновляем данные на экране через существующую функцию loadData
         await loadData(); 
 
     } catch (err) {
@@ -559,6 +614,52 @@ async function init() {
     // 5. Загружаем данные
     await loadData();
 }
+// Mobile menu toggle helpers and table wrapper
+function toggleMobileMenu() {
+    const asideEl = document.querySelector('aside');
+    const overlay = document.getElementById('mobile-overlay');
+    if (!asideEl) return;
+    if (asideEl.classList.contains('mobile-open')) {
+        closeMobileMenu();
+    } else {
+        openMobileMenu();
+    }
+}
+
+function openMobileMenu() {
+    const asideEl = document.querySelector('aside');
+    const overlay = document.getElementById('mobile-overlay');
+    if (!asideEl) return;
+    asideEl.classList.add('mobile-open');
+    if (overlay) { overlay.classList.remove('hidden'); overlay.classList.add('block'); }
+    // prevent body scroll while menu open
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+    const asideEl = document.querySelector('aside');
+    const overlay = document.getElementById('mobile-overlay');
+    if (!asideEl) return;
+    asideEl.classList.remove('mobile-open');
+    if (overlay) { overlay.classList.remove('block'); overlay.classList.add('hidden'); }
+    document.body.style.overflow = '';
+}
+
+// Wrap any top-level tables with a scroll container to avoid page horizontal scroll
+function wrapTablesForMobile() {
+    document.querySelectorAll('table').forEach(tbl => {
+        if (!tbl.parentElement) return;
+        if (tbl.parentElement.classList.contains('table-wrapper')) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        tbl.parentElement.insertBefore(wrapper, tbl);
+        wrapper.appendChild(tbl);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    wrapTablesForMobile();
+});
 
 // Запускаем всё один раз
 init();

@@ -78,59 +78,60 @@
 </head>
 <body class="flex min-h-screen">
 
-<aside class="w-20 md:w-64 fixed h-full p-3 md:p-6 text-white flex flex-col shadow-2xl z-50">
+<aside class="hidden md:flex w-20 md:w-64 fixed h-full p-3 md:p-6 text-white flex-col shadow-2xl z-50">
         <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter hidden md:block">EDUTRACK</div>
         <div class="text-2xl font-black mb-10 text-blue-500 italic tracking-tighter md:hidden text-center">E</div>
         
         <nav class="flex-1 space-y-3">
             <button onclick="tab('my-st')" id="nav-my-st" class="nav-link active w-full text-left p-4 rounded-2xl font-bold transition-all">
                 <i class="fa-solid fa-star mr-2"></i> 
-                <span class="hidden md:inline" data-i18n="menu-my">Мои ученики</span>
+                <span class="hidden md:inline" data-i18n="menu-my">My students</span>
             </button>
             <button onclick="tab('att')" id="nav-att" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
                 <i class="fa-solid fa-calendar-check mr-2"></i> 
-                <span class="hidden md:inline" data-i18n="menu-att">Посещаемость</span>
+                <span class="hidden md:inline" data-i18n="menu-att">Attendance</span>
             </button>
             <button onclick="tab('all-st')" id="nav-all-st" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
                 <i class="fa-solid fa-users mr-2"></i> 
-                <span class="hidden md:inline" data-i18n="menu-all">Все ученики</span>
+                <span class="hidden md:inline" data-i18n="menu-all">All students</span>
             </button>
             <button onclick="tab('tc')" id="nav-tc" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
                 <i class="fa-solid fa-chalkboard-user mr-2"></i> 
-                <span class="hidden md:inline" data-i18n="menu-tc">Коллеги</span>
+                <span class="hidden md:inline" data-i18n="menu-tc">Colleagues</span>
             </button>
             <button onclick="tab('demo')" id="nav-demo" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
                 <i class="fa-solid fa-clock mr-2"></i> 
-                <span class="hidden md:inline" data-i18n="menu-demo">Демо-часы</span>
+                <span class="hidden md:inline" data-i18n="menu-demo">Demo-hours</span>
             </button>
             <button onclick="tab('pr')" id="nav-pr" class="nav-link w-full text-left p-4 rounded-2xl font-bold transition-all">
                 <i class="fa-solid fa-user mr-2"></i> 
-                <span class="hidden md:inline" data-i18n="menu-pr">Профиль</span>
+                <span class="hidden md:inline" data-i18n="menu-pr">Profil</span>
             </button>
         </nav>
         
-<div class="hidden flex gap-2 justify-center mb-6 bg-white/5 p-2 rounded-xl">
-    <button onclick="setLang('RU')" id="l-RU" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">RU</button>
-    <button onclick="setLang('EN')" id="l-EN" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">EN</button>
-    <button onclick="setLang('AZ')" id="l-AZ" class="lang-btn p-2 text-xs font-bold text-white/50 hover:text-white">AZ</button>
-</div>
+<!-- language selector removed (English-only) -->
         <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors"><i class="fa-solid fa-power-off mr-2"></i> <span class="hidden md:inline" data-i18n="logout">Выйти</span></button>
     </aside>
 
-    <main class="flex-1 ml-20 md:ml-64 p-4 md:p-10 transition-all">
+    <main class="flex-1 ml-0 md:ml-64 p-4 md:p-10 transition-all">
         <header class="mb-12">
-            <h1 id="teacher-display-name-main" class="text-4xl font-black text-slate-800 tracking-tight mb-8 uppercase italic">Кабинет учителя</h1>
+            <div class="md:hidden mb-4">
+                <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="p-3 bg-white rounded-lg shadow text-slate-800">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+            <h1 id="teacher-display-name-main" class="text-4xl font-black text-slate-800 tracking-tight mb-8 uppercase italic">Teacher's office</h1>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-[30px] border-b-4 border-blue-600 shadow-sm flex items-center justify-between">
-                    <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-st-label">Студентов</p><h3 id="count-st" class="text-3xl font-black text-slate-800">0</h3></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-st-label">Students</p><h3 id="count-st" class="text-3xl font-black text-slate-800">0</h3></div>
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-user-graduate"></i></div>
                 </div>
                 <div class="bg-white p-6 rounded-[30px] border-b-4 border-slate-900 shadow-sm flex items-center justify-between">
-                    <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-tc-label">Учителей</p><h3 id="count-tc" class="text-3xl font-black text-slate-800">0</h3></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-tc-label">Teachers</p><h3 id="count-tc" class="text-3xl font-black text-slate-800">0</h3></div>
                     <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-apple-whole"></i></div>
                 </div>
                 <div class="bg-white p-6 rounded-[30px] border-b-4 border-blue-600 shadow-sm flex items-center justify-between">
-                    <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-my-label">Ваши ученики</p><h3 id="count-my" class="text-3xl font-black text-blue-600">0</h3></div>
+                    <div><p class="text-[10px] font-black uppercase text-slate-400" data-i18n="count-my-label">My students</p><h3 id="count-my" class="text-3xl font-black text-blue-600">0</h3></div>
                     <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-heart"></i></div>
                 </div>
             </div>
@@ -138,93 +139,93 @@
 
 <div id="sec-att" class="tab-section">
     <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 mb-8">
-        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase italic">Посещаемость</h2>
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase italic">Attendance</h2>
         
         <div class="bg-slate-50 p-6 rounded-[30px] mb-10">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Ученик</label>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Student</label>
                     <select id="att-select-student" onchange="loadAttendanceHistory()" class="w-full p-4 bg-white rounded-2xl font-bold border-none outline-none shadow-sm"></select>
                 </div>
                 
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Дата занятия (План)</label>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Class date (Plan)</label>
                     <input type="date" id="att-lesson-date" class="w-full p-4 bg-white rounded-2xl font-bold border-none outline-none shadow-sm">
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Статус</label>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Status</label>
                     <select id="att-status" class="w-full p-4 bg-white rounded-2xl font-bold border-none outline-none shadow-sm">
-                        <option value="present">Пришёл</option>
-                        <option value="absent">Не пришёл</option>
-                        <option value="late">Опоздал</option>
-                        <option value="transferred">Перенесён</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                        <option value="transferred">Transferred</option>
                     </select>
                 </div>
 
-                <button onclick="saveAttendance()" class="bg-blue-600 text-white h-[58px] rounded-2xl font-black uppercase text-xs shadow-lg shadow-blue-200 hover:scale-105 transition-all">Сохранить</button>
+                <button onclick="saveAttendance()" class="bg-blue-600 text-white h-[58px] rounded-2xl font-black uppercase text-xs shadow-lg shadow-blue-200 hover:scale-105 transition-all">Save</button>
             </div>
             
             <div id="extra-att-fields" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
-                <input type="text" id="att-details" placeholder="Инфо (на сколько минут / на какую дату)" class="w-full p-4 bg-white rounded-2xl font-bold border-none outline-none shadow-sm text-sm">
+                <input type="text" id="att-details" placeholder="Info (на сколько минут / на какую дату)" class="w-full p-4 bg-white rounded-2xl font-bold border-none outline-none shadow-sm text-sm">
             </div>
         </div>
 
-        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 ml-2">Детальная история</h3>
+        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 ml-2">Details</h3>
         <div id="attendance-history-list" class="space-y-4">
-            <div class="text-center py-10 text-slate-300 font-bold uppercase text-[10px]">Выберите ученика в списке</div>
+            <div class="text-center py-10 text-slate-300 font-bold uppercase text-[10px]">Choose student</div>
         </div>
     </div>
 </div>
 
         <div id="sec-my-st" class="tab-section active">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black text-slate-800 uppercase italic" data-i18n="menu-my">Мои ученики</h2>
+                <h2 class="text-2xl font-black text-slate-800 uppercase italic" data-i18n="menu-my">My students</h2>
                 <div class="flex gap-4">
-                    <button onclick="openAddModal()" class="bg-slate-200 text-slate-700 px-6 py-4 rounded-2xl font-black uppercase text-xs" data-i18n="btn-link">Привязать</button>
-                    <button onclick="openCreateModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl uppercase text-xs" data-i18n="btn-create-new">+ Создать</button>
+                    <button onclick="openAddModal()" class="bg-slate-200 text-slate-700 px-6 py-4 rounded-2xl font-black uppercase text-xs" data-i18n="btn-link">Tie Student</button>
+                    <button onclick="openCreateModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl uppercase text-xs" data-i18n="btn-create-new">+ Create</button>
                 </div>
             </div>
             <div id="my-st-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8"></div>
         </div>
 
         <div id="sec-all-st" class="tab-section">
-            <h2 class="text-2xl font-black text-slate-800 mb-8 uppercase italic" data-i18n="menu-all">Все ученики</h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-8 uppercase italic" data-i18n="menu-all">All students</h2>
             <div id="all-st-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         <div id="sec-tc" class="tab-section">
-            <h2 class="text-2xl font-black text-slate-800 mb-8 uppercase italic" data-i18n="menu-tc">Коллеги</h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-8 uppercase italic" data-i18n="menu-tc">Colleagues</h2>
             <div id="tc-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
 <div id="sec-demo" class="tab-section w-full">
     <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-black text-slate-800 uppercase italic" data-i18n="menu-demo">Управление Демо</h2>
+        <h2 class="text-2xl font-black text-slate-800 uppercase italic" data-i18n="menu-demo">Control Demo</h2>
     </div>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div class="lg:col-span-1">
             <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[40px] text-white shadow-xl shadow-blue-200">
-                <h3 class="text-lg font-black uppercase italic mb-6 opacity-90">Добавить слот</h3>
+                <h3 class="text-lg font-black uppercase italic mb-6 opacity-90">Add slot</h3>
                 <div class="space-y-5">
                     <div>
-                        <label class="text-[10px] font-bold uppercase opacity-60 ml-2">Дата</label>
+                        <label class="text-[10px] font-bold uppercase opacity-60 ml-2">Data</label>
                         <input type="date" id="demo-date" class="w-full p-4 bg-white/10 border border-white/20 rounded-2xl font-bold text-white placeholder-white/50 outline-none focus:bg-white/20 transition-all backdrop-blur-sm">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold uppercase opacity-60 ml-2">Время</label>
+                        <label class="text-[10px] font-bold uppercase opacity-60 ml-2">Time</label>
                         <input type="time" id="demo-time" class="w-full p-4 bg-white/10 border border-white/20 rounded-2xl font-bold text-white outline-none focus:bg-white/20 transition-all backdrop-blur-sm">
                     </div>
                     <button onclick="addDemoSlot()" class="w-full bg-white text-blue-600 py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all mt-4">
-                        Опубликовать <i class="fa-solid fa-paper-plane ml-2"></i>
+                        Save <i class="fa-solid fa-paper-plane ml-2"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-2 bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
-            <h3 class="text-lg font-black text-slate-800 uppercase italic mb-6">Ваши открытые часы</h3>
+            <h3 class="text-lg font-black text-slate-800 uppercase italic mb-6">My hours</h3>
             <div id="demo-slots-list" class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 </div>
         </div>
@@ -233,7 +234,7 @@
     <div class="bg-white p-6 md:p-10 rounded-[50px] border border-slate-100 shadow-sm w-full h-auto">
         <div class="flex items-center justify-between mb-10 px-4">
             <div class="flex items-center gap-5">
-                <h3 class="text-2xl md:text-3xl font-black text-slate-800 uppercase italic">Заявки с главной страницы</h3>
+                <h3 class="text-2xl md:text-3xl font-black text-slate-800 uppercase italic">Applications from the main page</h3>
                 <span class="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-pulse">LIVE</span>
             </div>
             <div class="text-right hidden md:block">
@@ -241,13 +242,13 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto w-full">
+        <div class="overflow-x-auto md:overflow-visible w-full responsive-table">
             <table class="w-full text-left border-separate border-spacing-y-5">
                 <thead>
                     <tr class="text-[12px] font-black text-slate-400 uppercase tracking-[0.3em]">
-                        <th class="pb-6 pl-12">Ученик</th>
-                        <th class="pb-6">Телефон</th>
-                        <th class="pb-6">Желаемое время</th>
+                        <th class="pb-6 pl-12">Student</th>
+                        <th class="pb-6">Number</th>
+                        <th class="pb-6">Date</th>
                         <th class="pb-6 text-right pr-12">Действие</th>
                     </tr>
                 </thead>
@@ -257,6 +258,25 @@
         </div>
     </div>
 </div>
+
+    <!-- Mobile overlay sidebar (only shown on small screens) -->
+    <div id="mobile-aside" class="fixed inset-y-0 left-0 z-50 w-64 p-4 bg-slate-900 text-white transform -translate-x-full transition-transform md:hidden">
+        <div class="flex items-center justify-between mb-6">
+            <div class="text-2xl font-black italic tracking-tighter text-blue-400">EDUTRACK</div>
+            <button onclick="toggleMobileMenu()" class="p-2 rounded bg-white text-slate-900"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <nav class="space-y-3">
+            <button onclick="tab('my-st'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-star"></i> <span>Мои ученики</span></button>
+            <button onclick="tab('att'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-calendar-check"></i> <span>Attendance</span></button>
+            <button onclick="tab('all-st'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-users"></i> <span>Все ученики</span></button>
+            <button onclick="tab('tc'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-chalkboard-user"></i> <span>Коллеги</span></button>
+            <button onclick="tab('demo'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-clock"></i> <span>Демо-часы</span></button>
+            <button onclick="tab('pr'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-user"></i> <span>Профиль</span></button>
+        </nav>
+        <div class="mt-auto">
+            <button onclick="logout()" class="w-full mt-6 p-3 bg-red-500 rounded text-white font-bold"><i class="fa-solid fa-power-off mr-2"></i> Выйти</button>
+        </div>
+    </div>
 
 
         <div id="sec-pr" class="tab-section">
@@ -268,28 +288,41 @@
                             <label class="absolute -bottom-2 -right-2 bg-slate-900 text-white p-2 rounded-xl cursor-pointer hover:bg-blue-600 transition-colors"><i class="fa-solid fa-camera text-xs"></i><input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="previewImage(this)"></label>
                         </div>
                         <div>
-                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1" data-i18n="role-tc">Учитель</p>
+                            <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1" data-i18n="role-tc">Teacher</p>
                             <h3 id="display-name-profile" class="text-2xl font-black text-slate-800">---</h3>
                         </div>
                     </div>
                     <div class="space-y-6">
-                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-name">Имя Фамилия</label><input type="text" id="edit-name" class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-phone">Телефон</label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400">+994</span><input type="text" id="edit-phone" maxlength="9" class="w-full p-4 pl-16 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div></div>
+                        <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-name">First name and Last name</label><input type="text" id="edit-name" class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div>
+<div>
+    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase" data-i18n="field-phone">Number</label>
+    <div class="flex gap-2">
+        <select id="edit-country-code" class="w-1/3 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none appearance-none cursor-pointer">
+            <option value="+994">+994 🇦🇿</option>
+            <option value="+7">+7 🇷🇺</option>
+            <option value="+90">+90 🇹🇷</option>
+            <option value="+1">+1 🇺🇸</option>
+            <option value="+44">+44 🇬🇧</option>
+        </select>
+        
+        <input type="text" id="edit-phone" placeholder="501234567" class="w-2/3 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none">
+    </div>
+</div>
                         <div><label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Zoom Link</label><input type="url" id="edit-zoom" placeholder="https://zoom.us/j/..." class="w-full mt-1 p-4 bg-slate-50 rounded-2xl font-bold border-2 border-transparent focus:border-blue-600 outline-none"></div>
-                        <button onclick="saveProfile()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 transition-all shadow-xl" data-i18n="btn-save">Обновить</button>
+                        <button onclick="saveProfile()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 transition-all shadow-xl" data-i18n="btn-save">Save</button>
                     </div>
                 </div>
                 <div class="flex flex-col gap-6">
                     <div class="bg-white p-10 rounded-[40px] shadow-sm border-2 border-slate-50">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="acc-status">Статус аккаунта</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="acc-status">Account status</p>
                         <div class="flex gap-1 mb-10"><div class="h-1.5 w-10 bg-blue-600 rounded-full"></div><div class="h-1.5 w-10 bg-blue-600 rounded-full"></div><div class="h-1.5 w-10 bg-slate-200 rounded-full"></div></div>
                         <div class="bg-slate-50 p-8 rounded-[35px] border border-slate-100">
-                            <p class="text-[10px] font-black text-slate-400 uppercase mb-4" data-i18n="count-my-label">Ваши ученики</p>
+                            <p class="text-[10px] font-black text-slate-400 uppercase mb-4" data-i18n="count-my-label">Your students</p>
                             <div class="flex items-center gap-4"><h4 id="count-my-profile" class="text-5xl font-black text-slate-800">0</h4><div class="text-blue-600 text-2xl"><i class="fa-solid fa-graduation-cap"></i></div></div>
                         </div>
                     </div>
                     <div class="bg-white p-8 rounded-[40px] shadow-sm border-2 border-slate-50">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4" data-i18n="label-subject">Ваш предмет</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4" data-i18n="label-subject">Your item</p>
                         <select id="edit-subject" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-600 rounded-2xl font-bold text-slate-700 outline-none">
                             <option value="" data-i18n="opt-sub">Выберите урок</option>
                             <option value="English">Английский</option>
@@ -305,26 +338,39 @@
 
     <div id="addModal" class="modal">
         <div class="bg-white w-full max-w-md rounded-[40px] p-8 shadow-2xl">
-            <h2 class="text-2xl font-black mb-6 uppercase italic text-slate-800" data-i18n="modal-select-title">Выбрать ученика</h2>
+            <h2 class="text-2xl font-black mb-6 uppercase italic text-slate-800" data-i18n="modal-select-title">Select student</h2>
             <div id="available-st-list" class="space-y-3 max-h-80 overflow-y-auto mb-6 pr-2"></div>
-            <button onclick="closeModal('addModal')" class="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase text-xs" data-i18n="btn-cancel">Закрыть</button>
+            <button onclick="closeModal('addModal')" class="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase text-xs" data-i18n="btn-cancel">Close</button>
         </div>
     </div>
 
     <div id="createStudentModal" class="modal">
         <div class="bg-white p-12 rounded-[45px] shadow-2xl w-full max-w-md border-t-[12px] border-blue-600 overflow-y-auto max-h-[95vh] relative">
             <button onclick="closeModal('createStudentModal')" class="absolute top-6 right-8 text-slate-300 hover:text-slate-500 transition-colors"><i class="fa-solid fa-xmark fa-xl"></i></button>
-            <h2 class="text-3xl font-black mb-10 text-slate-800 italic uppercase text-center tracking-tight" data-i18n="modal-create-title">Новый ученик</h2>
+            <h2 class="text-3xl font-black mb-10 text-slate-800 italic uppercase text-center tracking-tight" data-i18n="modal-create-title">New student</h2>
             <div class="space-y-6">
-                <div class="group"><label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest" data-i18n="field-name">Имя Фамилия</label><input type="text" id="new-st-name" placeholder="Имя Фамилия" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all"></div>
+                <div class="group"><label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest" data-i18n="field-name">First name and Last name</label><input type="text" id="new-st-name" placeholder="Name and Surname" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all"></div>
                 <div class="group"><label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Email</label><input type="email" id="new-st-email" placeholder="example@mail.com" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all"></div>
-                <div class="group"><label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest" data-i18n="ph-pass">Пароль</label><input type="password" id="new-st-pass" placeholder="••••••••" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all"></div>
-                <div class="group"><label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest" data-i18n="field-phone">Телефон</label><div class="relative"><span class="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-400">+994</span><input type="text" id="new-st-phone" placeholder="50 123 45 67" maxlength="9" class="w-full p-5 pl-16 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all"></div></div>
+                <div class="group"><label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest" data-i18n="ph-pass">Password</label><input type="password" id="new-st-pass" placeholder="••••••••" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all"></div>
+<div class="group">
+    <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest" data-i18n="field-phone">Phone number</label>
+    <div class="flex gap-2">
+        <select id="new-st-country-code" class="w-1/3 p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 transition-all cursor-pointer">
+            <option value="+994">+994 🇦🇿</option>
+            <option value="+7">+7 🇷🇺</option>
+            <option value="+90">+90 🇹🇷</option>
+            <option value="+1">+1 🇺🇸</option>
+            <option value="+44">+44 🇬🇧</option>
+        </select>
+        
+        <input type="text" id="new-st-phone" placeholder="50 123 45 67" maxlength="15" class="w-2/3 p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 focus:shadow-lg focus:shadow-blue-50 transition-all">
+    </div>
+</div>
                 <div class="grid grid-cols-1 gap-4 pt-2">
-                    <select id="new-st-lvl" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-600 appearance-none focus:border-blue-600 transition-all cursor-pointer"><option value="" disabled selected data-i18n="opt-lvl">Уровень (LVL)</option><option value="A1">A1 - Beginner</option><option value="A2">A2 - Elementary</option><option value="B1">B1 - Intermediate</option><option value="B2">B2 - Upper-Intermediate</option><option value="C1">C1 - Advanced</option></select>
-                    <select id="new-st-subject" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-600 appearance-none focus:border-blue-600 transition-all cursor-pointer"><option value="" disabled selected data-i18n="opt-sub">Предмет</option><option value="English">English</option><option value="Math">Math</option><option value="Programming">Programming</option><option value="Art">Art</option></select>
+                    <select id="new-st-lvl" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-600 appearance-none focus:border-blue-600 transition-all cursor-pointer"><option value="" disabled selected data-i18n="opt-lvl">Level (LVL)</option><option value="A1">A1 - Beginner</option><option value="A2">A2 - Elementary</option><option value="B1">B1 - Intermediate</option><option value="B2">B2 - Upper-Intermediate</option><option value="C1">C1 - Advanced</option><option value="C2">C2 - Proficiency</option></select>
+                    <select id="new-st-subject" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-600 appearance-none focus:border-blue-600 transition-all cursor-pointer"><option value="" disabled selected data-i18n="opt-sub">Subject</option><option value="English">English</option><option value="Math">Math</option><option value="Programming">Programming</option><option value="Art">Art</option></select>
                 </div>
-                <div class="pt-6"><button onclick="createStudent()" id="btn-create-st" class="w-full bg-slate-900 text-white py-6 rounded-[28px] font-black uppercase tracking-widest hover:bg-blue-600 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-slate-200" data-i18n="btn-create-submit">Создать и привязать</button><button onclick="closeModal('createStudentModal')" class="w-full text-slate-400 font-bold mt-6 hover:text-slate-600 transition-colors uppercase text-[10px] tracking-widest" data-i18n="btn-cancel">Отмена</button></div>
+                <div class="pt-6"><button onclick="createStudent()" id="btn-create-st" class="w-full bg-slate-900 text-white py-6 rounded-[28px] font-black uppercase tracking-widest hover:bg-blue-600 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-slate-200" data-i18n="btn-create-submit">Create and tie</button><button onclick="closeModal('createStudentModal')" class="w-full text-slate-400 font-bold mt-6 hover:text-slate-600 transition-colors uppercase text-[10px] tracking-widest" data-i18n="btn-cancel">Close</button></div>
             </div>
         </div>
     </div>
@@ -332,36 +378,36 @@
 <div id="hwModal" class="modal">
     <div class="bg-white p-12 rounded-[45px] shadow-2xl w-full max-w-md border-t-[12px] border-blue-600 overflow-y-auto max-h-[95vh] relative">
         <button onclick="closeModal('hwModal')" class="absolute top-6 right-8 text-slate-300 hover:text-slate-500"><i class="fa-solid fa-xmark fa-xl"></i></button>
-        <h2 class="text-3xl font-black mb-10 text-slate-800 italic uppercase text-center tracking-tight">Задать ДЗ</h2>
+        <h2 class="text-3xl font-black mb-10 text-slate-800 italic uppercase text-center tracking-tight">Assign Homework</h2>
         <div class="space-y-6">
             <div class="group">
-                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Тема урока</label>
-                <input type="text" id="hw-topic" placeholder="Например: Present Simple" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 transition-all">
+                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Lesson topic</label>
+                <input type="text" id="hw-topic" placeholder="For example: Present Simple" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 transition-all">
             </div>
             
             <div class="group">
-                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Что нужно сделать</label>
-                <textarea id="hw-task" rows="3" placeholder="Страница 10, упр 5..." class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 transition-all"></textarea>
+                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">What to do</label>
+                <textarea id="hw-task" rows="3" placeholder="Page 10, exercise 5..." class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 transition-all"></textarea>
             </div>
             
             <div class="group">
-                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Срок выполнения</label>
+                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Due date</label>
                 <input type="date" id="hw-deadline" class="w-full p-5 bg-slate-50 border-2 border-slate-50 rounded-[24px] outline-none font-bold text-slate-700 focus:bg-white focus:border-blue-600 transition-all">
             </div>
 
             <div class="group mt-4">
-                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Прикрепить материал (PDF, Image)</label>
+                <label class="text-[10px] font-black text-slate-400 ml-4 uppercase mb-2 block tracking-widest">Attach material (PDF, Image)</label>
                 <label class="flex items-center justify-center w-full p-4 border-2 border-dashed border-slate-200 rounded-[24px] cursor-pointer hover:bg-slate-50 transition-all group">
                     <div class="flex items-center gap-3">
                         <i class="fas fa-cloud-upload-alt text-slate-300 group-hover:text-blue-500"></i>
-                        <span id="hw-file-name" class="text-[11px] font-bold text-slate-500 uppercase">Выбрать файл</span>
+                        <span id="hw-file-name" class="text-[11px] font-bold text-slate-500 uppercase">Select file</span>
                     </div>
                     <input type="file" id="hw-file" class="hidden" onchange="document.getElementById('hw-file-name').innerText = this.files[0].name">
                 </label>
             </div>
 
             <div class="pt-6">
-                <button onclick="submitHomework()" id="btn-hw-submit" class="w-full bg-slate-900 text-white py-6 rounded-[28px] font-black uppercase tracking-widest hover:bg-blue-600 shadow-xl transition-all">Отправить задание</button>
+                <button onclick="submitHomework()" id="btn-hw-submit" class="w-full bg-slate-900 text-white py-6 rounded-[28px] font-black uppercase tracking-widest hover:bg-blue-600 shadow-xl transition-all">Submit assignment</button>
             </div>
         </div>
     </div>
@@ -373,58 +419,66 @@
     window.tid = null;
     let currentHwStudentId = null;
 
-    const i18n = {
-        EN: { 
-            "menu-my": "My Students", "menu-att": "Attendance", "menu-all": "All Students", "menu-tc": "Colleagues", "menu-pr": "Profile", "menu-demo": "Demo Hours",
-            "logout": "Logout", "count-st-label": "Students", "count-tc-label": "Teachers", "count-my-label": "Your Students", 
-            "btn-hw": "Assign HW", "no-phone": "No phone", "role-tc": "Teacher", "role-st": "Student",
-            "cabinet-title": "Teacher Panel", "opt-st-list": "-- Student List --",
-            "st-present": "Present", "st-absent": "Absent", "st-late": "Late", "no-records": "No records"
-        }
-    };
+    // Site is English-only now; removed translations object.
 
 async function init() {
+    // 1. Сначала определяем ID пользователя (берем либо из Auth, либо из localStorage)
     const { data: { user } } = await _supabase.auth.getUser();
-    if (!user) { window.location.href = "index.html"; return; }
-    window.tid = user.id;
+    const userId = user ? user.id : localStorage.getItem('user_id');
 
-    const { data: p } = await _supabase.from('profiles').select('*').eq('id', window.tid).single();
+    if (!userId) { 
+        window.location.href = "index.html"; 
+        return; 
+    }
+    window.tid = userId;
+
+    // 2. !!! САМОЕ ГЛАВНОЕ: Запускаем загрузку данных СРАЗУ !!!
+    // Это гарантирует, что ученики появятся мгновенно, не дожидаясь ответа профиля
+    if (typeof setLang === 'function') {
+        setLang(currentLang); 
+    } else if (typeof loadData === 'function') {
+        loadData();
+    }
+
+    // 3. А теперь фоном подгружаем настройки профиля и блокировки
+    const { data: p, error } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', window.tid)
+        .single();
     
     if (p) {
-        // Твой стандартный код заполнения данных профиля (оставляем как есть)
-        if(document.getElementById('teacher-display-name-main')) document.getElementById('teacher-display-name-main').innerText = p.full_name || "Кабинет учителя";
-        if(document.getElementById('display-name-profile')) document.getElementById('display-name-profile').innerText = p.full_name || "Учитель";
+        // Заполняем текст и поля (имя, зум, телефон)
+        if(document.getElementById('teacher-display-name-main')) document.getElementById('teacher-display-name-main').innerText = p.full_name || "Teacher Panel";
+        if(document.getElementById('display-name-profile')) document.getElementById('display-name-profile').innerText = p.full_name || "Teacher";
         if(document.getElementById('edit-name')) document.getElementById('edit-name').value = p.full_name || "";
         if(document.getElementById('edit-zoom')) document.getElementById('edit-zoom').value = p.zoom_link || "";
         if(document.getElementById('edit-subject')) document.getElementById('edit-subject').value = p.subject || "";
         if (p.phone && document.getElementById('edit-phone')) document.getElementById('edit-phone').value = p.phone.replace('+994', '').trim();
 
-        // --- ЛОГИКА БЛОКИРОВКИ 5-Й КНОПКИ ---
+        // --- ЛОГИКА БЛОКИРОВКИ 5-Й КНОПКИ (ДЕМО) ---
         if (p.can_demo === false) {
             const navButtons = document.querySelectorAll('aside nav button');
             const demoBtn = navButtons[4]; // 5-я кнопка
 
             if (demoBtn) {
                 demoBtn.onclick = null;
-                demoBtn.setAttribute('onclick', '');
-                
+                demoBtn.style.opacity = "0.4";
+                demoBtn.style.filter = "grayscale(1)";
                 demoBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    // ВМЕСТО ALERT ОТКРЫВАЕМ МОДАЛКУ
-                    document.getElementById('demo-lock-modal').classList.remove('hidden');
+                    const modal = document.getElementById('demo-lock-modal');
+                    if(modal) modal.classList.remove('hidden');
+                    else alert("Access denied");
                 }, true);
-
-                // Визуальный эффект для выключенной кнопки
-                demoBtn.style.opacity = "0.4";
-                demoBtn.style.filter = "grayscale(1)";
             }
         }
     }
 
-    const currentLang = localStorage.getItem('lang') || 'RU';
-    setLang(currentLang);
-    loadHomeDemoRequests();
+    // 4. Догружаем остальные части (заявки)
+    if (typeof loadHomeDemoRequests === 'function') loadHomeDemoRequests();
+    if (typeof loadDemoSlots === 'function') loadDemoSlots();
 }
     // --- ЗАГРУЗКА ДАННЫХ ---
     async function loadData() {
@@ -434,35 +488,36 @@ async function init() {
             const { data: schedule } = await _supabase.from('schedule').select('*').eq('teacher_id', window.tid);
             const myIds = schedule ? schedule.map(s => s.student_id) : [];
 
-            // Обновляем цифры
+            // Update counters
             if(document.getElementById('count-st')) document.getElementById('count-st').innerText = users.filter(u => u.role === 'student').length;
             if(document.getElementById('count-tc')) document.getElementById('count-tc').innerText = users.filter(u => u.role === 'teacher').length;
             if(document.getElementById('count-my')) document.getElementById('count-my').innerText = myIds.length;
             if(document.getElementById('count-my-profile')) document.getElementById('count-my-profile').innerText = myIds.length;
 
-            const l = localStorage.getItem('lang') || 'RU';
-
+            // Render card helper (English-only, no translations)
             const renderCard = (u, mode) => {
                 const isTeacher = u.role === 'teacher';
                 const isMy = mode === 'my';
-                
-                const badge = isTeacher 
+
+                const esc = (v) => (v === undefined || v === null) ? '' : String(v).replace(/'/g, "&#39;");
+
+                const badge = isTeacher
                     ? `<div class="px-3 py-1 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase mb-2 border border-blue-100">${u.subject || 'Teacher'}</div>`
                     : `<div class="px-3 py-1 bg-orange-50 text-orange-500 rounded-xl text-[10px] font-black uppercase mb-2 border border-orange-100">LVL: ${u.level || 'A1'}</div>`;
 
-                let footerBtn = isMy 
-                    ? `<button onclick="openHomeworkModal('${u.id}')" class="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200/50"><i class="fa-solid fa-book-open"></i> ${i18n[l]['btn-hw']}</button>`
-                    : `<div class="w-full py-3 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] text-center uppercase border border-slate-100">${isTeacher ? i18n[l]['role-tc'] : i18n[l]['role-st']}</div>`;
+                const footerBtn = isMy
+                    ? `<button onclick="openHomeworkModal('${esc(u.id)}', '${esc(u.phone)}', '${esc(u.full_name)}')" class="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200/50"><i class="fa-solid fa-book-open"></i> Assign HW</button>`
+                    : `<div class="w-full py-3 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] text-center uppercase border border-slate-100">${isTeacher ? 'Teacher' : 'Student'}</div>`;
 
                 return `
                 <div class="group relative bg-white p-6 rounded-[35px] border border-slate-100 flex flex-col items-center text-center shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.1)] transition-all duration-300 hover:-translate-y-1">
-                    ${isMy ? `<button onclick="unlink('${u.id}')" class="absolute top-5 right-5 text-slate-300 hover:text-red-500 transition-colors p-2"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>` : ''}
+                    ${isMy ? `<button onclick="unlink('${esc(u.id)}')" class="absolute top-5 right-5 text-slate-300 hover:text-red-500 transition-colors p-2"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>` : ''}
                     <div class="w-20 h-20 bg-slate-50 rounded-[25px] mb-4 flex items-center justify-center font-black text-2xl text-slate-300 border-2 border-white ring-1 ring-slate-100 overflow-hidden shadow-inner">
                         ${u.avatar_url ? `<img src="${u.avatar_url}" class="w-full h-full object-cover">` : u.full_name ? u.full_name[0] : '?'}
                     </div>
                     <h4 class="font-black text-slate-800 text-lg mb-1 leading-tight line-clamp-1">${u.full_name || '...'}</h4>
                     ${badge}
-                    <p class="text-blue-500 font-bold text-xs mb-6 opacity-80">${u.phone || i18n[l]['no-phone']}</p>
+                    <p class="text-blue-500 font-bold text-xs mb-6 opacity-80">${u.phone || 'No phone'}</p>
                     <div class="mt-auto w-full">${footerBtn}</div>
                 </div>`;
             };
@@ -472,17 +527,17 @@ async function init() {
             if(document.getElementById('all-st-list')) document.getElementById('all-st-list').innerHTML = users.filter(u => u.role === 'student').map(u => renderCard(u, 'all')).join('');
             if(document.getElementById('tc-list')) document.getElementById('tc-list').innerHTML = users.filter(u => u.role === 'teacher').map(u => renderCard(u, 'tc')).join('');
 
-            // Заполняем выпадающий список
+            // Fill attendance select
             const attSelect = document.getElementById('att-select-student');
             if(attSelect && myStudentsData.length > 0) {
-                attSelect.innerHTML = `<option value="">${i18n[l]['opt-st-list']}</option>` + 
+                attSelect.innerHTML = `<option value="">-- Student List --</option>` + 
                     myStudentsData.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
             }
 
-        } catch (e) { console.error("Ошибка загрузки данных:", e); }
+        } catch (e) { console.error("Error loading data:", e); }
     }
 
-    // --- ФУНКЦИОНАЛ ПОСЕЩАЕМОСТИ ---
+// --- ОБНОВЛЕННЫЙ ФУНКЦИОНАЛ ПОСЕЩАЕМОСТИ (ВСЁ НА АНГЛИЙСКОМ) ---
 async function loadAttendanceHistory() {
     const list = document.getElementById('attendance-history-list');
     const sid = document.getElementById('att-select-student').value;
@@ -495,21 +550,21 @@ async function loadAttendanceHistory() {
         .order('date', { ascending: false });
 
     if (!data || data.length === 0) {
-        list.innerHTML = '<div class="text-center py-10 text-slate-400 font-bold uppercase text-[10px]">История пуста</div>';
+        list.innerHTML = '<div class="text-center py-10 text-slate-400 font-bold uppercase text-[10px]">No records found</div>';
         return;
     }
 
     const statusStyle = {
-        'present': { bg: 'bg-green-100 text-green-700', icon: 'fa-check', label: 'Пришёл' },
-        'absent': { bg: 'bg-red-100 text-red-700', icon: 'fa-xmark', label: 'Пропустил' },
-        'late': { bg: 'bg-yellow-100 text-yellow-700', icon: 'fa-clock', label: 'Опоздал' },
-        'transferred': { bg: 'bg-indigo-100 text-indigo-700', icon: 'fa-calendar-day', label: 'Перенесён' }
+        'present': { bg: 'bg-green-100 text-green-700', icon: 'fa-check', label: 'Present' },
+        'absent': { bg: 'bg-red-100 text-red-700', icon: 'fa-xmark', label: 'Absent' },
+        'late': { bg: 'bg-yellow-100 text-yellow-700', icon: 'fa-clock', label: 'Late' },
+        'transferred': { bg: 'bg-indigo-100 text-indigo-700', icon: 'fa-calendar-day', label: 'Transferred' }
     };
 
     list.innerHTML = data.map(rec => {
         const s = statusStyle[rec.status] || { bg: 'bg-slate-100', icon: 'fa-minus', label: rec.status };
-        const setDate = new Date(rec.created_at || new Date()).toLocaleDateString(); // Дата выставления
-        const planDate = new Date(rec.date).toLocaleDateString(); // Дата урока
+        const setDate = new Date(rec.created_at || new Date()).toLocaleDateString('en-GB'); 
+        const planDate = new Date(rec.date).toLocaleDateString('en-GB'); 
 
         return `
             <div class="bg-white p-6 rounded-[30px] border border-slate-100 shadow-sm flex flex-wrap items-center justify-between gap-4">
@@ -520,22 +575,24 @@ async function loadAttendanceHistory() {
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="px-3 py-1 rounded-lg font-black text-[9px] uppercase ${s.bg}">${s.label}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Урок на: ${planDate}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Lesson date: ${planDate}</span>
                         </div>
-                        <div class="text-[10px] text-slate-400">Выставлено в системе: ${setDate}</div>
+                        <div class="text-[10px] text-slate-400">Logged in system: ${setDate}</div>
                     </div>
                 </div>
                 
                 <div class="flex-1 min-w-[200px] bg-slate-50 p-3 rounded-2xl">
-                    <div class="text-[9px] font-black text-slate-400 uppercase mb-1 tracking-widest">Инфо / Комментарий</div>
+                    <div class="text-[9px] font-black text-slate-400 uppercase mb-1 tracking-widest">Info / Comment</div>
                     <div class="text-xs font-bold text-slate-700">
-                        ${rec.details || '<span class="text-slate-300 italic font-normal text-[10px]">Нет доп. информации</span>'}
+                        ${rec.details || '<span class="text-slate-300 italic font-normal text-[10px]">No additional information</span>'}
                     </div>
                 </div>
             </div>
         `;
     }).join('');
 }
+
+// Эту часть оставь после функции, чтобы работало переключение полей при вводе
 document.getElementById('att-status').addEventListener('change', function() {
     const extra = document.getElementById('extra-att-fields');
     if (this.value === 'late' || this.value === 'transferred') {
@@ -569,37 +626,77 @@ async function saveAttendance() {
     }
 }
 
-    // --- ФУНКЦИОНАЛ ДЕМО ЧАСОВ ---
-    async function loadDemoSlots() {
-        const list = document.getElementById('demo-slots-list');
-        if(!list) return;
-        list.innerHTML = '<div class="col-span-2 text-center text-slate-400">Загрузка...</div>';
+async function loadDemoRequests() {
+    const list = document.getElementById('demo-requests-list');
+    if (!list) return;
+
+    // Загружаем данные из demo_requests и приклеиваем время из demo_slots
+    const { data, error } = await _supabase
+        .from('demo_requests')
+        .select(`
+            *,
+            demo_slots ( start_time )
+        `)
+        .eq('archived', false) // Показываем только тех, кто не в архиве
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error loading requests:", error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        list.innerHTML = '<div class="text-center text-slate-400 py-5">No new applications</div>';
+        return;
+    }
+
+    list.innerHTML = data.map(req => {
+        // Берем время из связанной таблицы demo_slots
+        const slotTime = req.demo_slots ? req.demo_slots.start_time : null;
+        let dateDisplay = "Время не указано";
         
-        const { data } = await _supabase.from('demo_slots').select('*').eq('teacher_id', window.tid);
-        
-        if(!data || data.length === 0) {
-            list.innerHTML = '<div class="col-span-2 text-center text-slate-300 py-10 bg-slate-50 rounded-3xl border border-dashed border-slate-200">Нет активных слотов</div>';
-            return;
+        if (slotTime) {
+            const d = new Date(slotTime);
+            dateDisplay = d.toLocaleString('en-GB', {
+                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+            });
         }
 
-        list.innerHTML = data.map(s => {
-            const dateObj = new Date(s.start_time);
-            const dateStr = dateObj.toLocaleDateString();
-            const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            return `
-            <div class="demo-card p-5 rounded-[25px] flex items-center justify-between">
+        return `
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 mb-3">
                 <div>
-                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Дата</div>
-                    <div class="font-black text-slate-700 text-lg">${dateStr}</div>
+                    <h4 class="font-bold text-slate-800">${req.full_name}</h4>
+                    <p class="text-xs text-slate-500">${req.phone} • ${req.course}</p>
+                    <p class="text-[10px] font-black text-indigo-500 uppercase mt-1">
+                        <i class="fa-regular fa-calendar-check mr-1"></i> ${dateDisplay}
+                    </p>
                 </div>
-                <div class="text-right">
-                    <div class="demo-time-badge px-3 py-1 rounded-lg text-sm font-bold mb-2">${timeStr}</div>
-                    <button onclick="deleteDemoSlot('${s.id}')" class="text-red-400 hover:text-red-600 text-xs font-bold uppercase transition-colors"><i class="fa-solid fa-trash mr-1"></i> Удалить</button>
+                <div class="flex gap-2">
+                    <button onclick="archiveRequest('${req.id}')" class="w-8 h-8 flex items-center justify-center bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200 transition-colors">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                    <a href="https://wa.me/${req.phone.replace(/\D/g, '')}" target="_blank" class="w-8 h-8 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full hover:bg-indigo-200 transition-colors">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
                 </div>
-            </div>`;
-        }).join('');
+            </div>
+        `;
+    }).join('');
+}
+async function archiveRequest(id) {
+    if (!confirm("Archive this request?")) return;
+
+    const { error } = await _supabase
+        .from('demo_requests')
+        .update({ archived: true })
+        .eq('id', id);
+
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        loadDemoRequests();
     }
+}
 
     async function addDemoSlot() {
         const date = document.getElementById('demo-date').value;
@@ -619,16 +716,15 @@ async function saveAttendance() {
         else loadDemoSlots();
     }
     
-    async function deleteDemoSlot(id) { 
-        if(!confirm("Удалить этот слот?")) return;
-        await _supabase.from('demo_slots').delete().eq('id', id); 
-        loadDemoSlots(); 
-    }
 async function createStudent() {
     const name = document.getElementById('new-st-name').value;
     const email = document.getElementById('new-st-email').value;
     const pass = document.getElementById('new-st-pass').value;
-    const phone = document.getElementById('new-st-phone').value;
+    
+    // ВАЖНО: Получаем код страны и сам номер отдельно
+    const countryCode = document.getElementById('new-st-country-code').value;
+    const phoneInput = document.getElementById('new-st-phone').value;
+    
     const level = document.getElementById('new-st-lvl').value;
     const subject = document.getElementById('new-st-subject').value;
 
@@ -638,6 +734,9 @@ async function createStudent() {
     const originalText = btn.innerText;
     btn.innerText = "СОЗДАНИЕ...";
     btn.disabled = true;
+
+    // Склеиваем код и номер в один полный номер
+    const fullPhone = countryCode + phoneInput.replace(/\D/g, '');
 
     try {
         // 1. Создаем пользователя в системе Supabase Auth
@@ -654,7 +753,7 @@ async function createStudent() {
             id: newStudentId,
             full_name: name,
             username: email,
-            phone: '+994' + phone.replace(/\D/g, ''),
+            phone: fullPhone, // Используем наш новый полный номер
             level: level,
             subject: subject,
             role: 'student'
@@ -677,8 +776,9 @@ async function createStudent() {
         document.getElementById('new-st-name').value = '';
         document.getElementById('new-st-email').value = '';
         document.getElementById('new-st-pass').value = '';
+        document.getElementById('new-st-phone').value = '';
         
-        loadData(); // Обновляем список учеников на странице
+        loadData(); // Обновляем список учеников
 
     } catch (err) {
         console.error("Ошибка при создании:", err);
@@ -689,101 +789,114 @@ async function createStudent() {
     }
 }
 
-    // --- ДОМАШНЕЕ ЗАДАНИЕ (ИСПРАВЛЕНО) ---
 async function submitHomework() {
     const title = document.getElementById('hw-topic').value;
     const content = document.getElementById('hw-task').value;
     const due_date = document.getElementById('hw-deadline').value;
-    const fileInput = document.getElementById('hw-file');
-    const file = fileInput.files[0];
+    const fileInput = document.getElementById('hw-file'); 
+    const file = fileInput ? fileInput.files[0] : null;
 
-    if (!title || !content || !due_date) return alert("Заполните все поля!");
+    if (!title || !content || !due_date) return alert("Please fill all fields!");
 
     const btn = document.getElementById('btn-hw-submit');
-    btn.innerText = "ЗАГРУЗКА...";
-    btn.disabled = true;
+    if (btn) { btn.innerText = "SAVING..."; btn.disabled = true; } else console.warn('submitHomework: submit button not found');
 
     try {
         let fileUrl = null;
 
-        // 1. Загружаем файл в Storage, если он выбран
+        // 1. ЗАГРУЗКА ФАЙЛА (если выбран)
         if (file) {
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
-            
-            const { error: uploadError } = await _supabase.storage
-                .from('homework-files')
-                .upload(fileName, file);
-
+            const { error: uploadError } = await _supabase.storage.from('homework-files').upload(fileName, file);
             if (uploadError) throw uploadError;
-
-            const { data: urlData } = _supabase.storage
-                .from('homework-files')
-                .getPublicUrl(fileName);
-            
+            const { data: urlData } = _supabase.storage.from('homework-files').getPublicUrl(fileName);
             fileUrl = urlData.publicUrl;
         }
-console.log("Кому отправляем (Student ID):", window.currentHwStudentId);
 
-console.log("Кто отправляет (Teacher ID):", window.tid);
-
-        // 2. Вставляем данные (названия колонок как в твоей базе)
+        // 2. СОХРАНЕНИЕ В БАЗУ Supabase
         const { error } = await _supabase.from('homework').insert([{
             teacher_id: window.tid,
             student_id: window.currentHwStudentId, 
-            title: title,       // было topic
-            content: content,   // было task
-            due_date: due_date, // было deadline
-            file_url: fileUrl,  // ссылка на файл
+            title: title,       
+            content: content,   
+            due_date: due_date, 
+            file_url: fileUrl,
             is_completed: false
         }]);
 
         if (error) throw error;
 
-        alert("Задание отправлено!");
-        closeModal('hwModal');
-        location.reload();
+        // 3. ОТПРАВКА В WHATSAPP
+        if (window.currentHwStudentPhone) {
+            let cleanPhone = window.currentHwStudentPhone.replace(/\D/g, '');
+            
+            // Если номер без кода страны:
+            if (cleanPhone.length === 9) { 
+                cleanPhone = '994' + cleanPhone; // Азербайджан
+            } else if (cleanPhone.length === 10 && cleanPhone.startsWith('5')) {
+                cleanPhone = '90' + cleanPhone;  // Турция
+            }
 
+            let message = `📚 *НОВОЕ ЗАДАНИЕ*\n\n` +
+                          `👤 Студент: ${window.currentHwStudentName}\n` +
+                          `📖 Тема: ${title}\n` +
+                          `📝 Задание: ${content}\n` +
+                          `📅 Срок: ${due_date}\n\n`;
+            
+            if (fileUrl) {
+                message += `📎 Файл прикреплен в кабинете!\n\n`;
+            }
+            message += `_EduTrack: Задание доступно в вашем профиле!_`;
+
+            const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+            window.open(waLink, '_blank');
+        }
+
+        alert("Saved successfully!");
+        closeModal('hwModal');
+        if(fileInput) fileInput.value = "";
+        
     } catch (err) {
-        alert("Ошибка: " + err.message);
+        alert("Error: " + err.message);
     } finally {
-        btn.innerText = "ОТПРАВИТЬ ЗАДАНИЕ";
-        btn.disabled = false;
+        if (btn) { btn.innerText = "Submit assignment"; btn.disabled = false; }
     }
 }
 
-    // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
-    function setLang(lang) {
-        localStorage.setItem('lang', lang);
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        if(document.getElementById('lang-' + lang)) document.getElementById('lang-' + lang).classList.add('active');
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (i18n[lang] && i18n[lang][key]) el.innerText = i18n[lang][key];
-        });
-        loadData();
-    }
+    // language switching removed — site is English-only
+function tab(name) {
+    // Проверяем, если переходим в раздел demo
+    if (name === 'demo') {
+        // Вызываем функции только если они определены (проверка прав доступа)
+        if (typeof loadDemoSlots === 'function') {
+            loadDemoSlots();
+        } else {
+            console.log("Доступ к Demo Slots ограничен или функции не загружены");
+        }
 
-    function tab(name) {
-        if (name === 'demo') 
-           loadDemoSlots();
-           loadHomeDemoRequests();
-        
-        document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-        const target = document.getElementById('sec-' + name);
-        if (target) target.classList.add('active');
-
-        document.querySelectorAll('.nav-link').forEach(l => {
-            l.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg');
-            l.classList.add('text-white/40'); 
-        });
-
-        const activeBtn = document.getElementById('nav-' + name);
-        if (activeBtn) {
-            activeBtn.classList.remove('text-white/40');
-            activeBtn.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/30');
+        if (typeof loadHomeDemoRequests === 'function') {
+            loadHomeDemoRequests();
         }
     }
+    
+    // Переключение видимости секций
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('sec-' + name);
+    if (target) target.classList.add('active');
+
+    // Стили ссылок меню
+    document.querySelectorAll('.nav-link').forEach(l => {
+        l.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/30');
+        l.classList.add('text-white/40'); 
+    });
+
+    const activeBtn = document.getElementById('nav-' + name);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-white/40');
+        activeBtn.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/30');
+    }
+}
 
     // Используем window.currentHwStudentId, чтобы переменная была видна во всех функциях
 function openCreateModal() { 
@@ -793,27 +906,38 @@ function openCreateModal() {
 function closeModal(id) { 
     document.getElementById(id).classList.remove('active'); 
 }
-
-function openHomeworkModal(sid) { 
-    window.currentHwStudentId = sid; // ЗАПОМИНАЕМ: кому именно задаем ДЗ
-    document.getElementById('hwModal').classList.add('active'); 
-}
+function openHomeworkModal(sid, phone, name) { 
+    window.currentHwStudentId = sid; 
+    window.currentHwStudentPhone = phone; // Сохраняем номер
+    window.currentHwStudentName = name;   // Сохраняем имя для сообщения
     
-    async function openAddModal() {
-        document.getElementById('addModal').classList.add('active');
-        const list = document.getElementById('available-st-list');
-        list.innerHTML = 'Загрузка...';
-        const { data: all } = await _supabase.from('profiles').select('*').eq('role', 'student');
-        const { data: my } = await _supabase.from('schedule').select('student_id').eq('teacher_id', window.tid);
-        const myIds = my.map(s => s.student_id);
-        const avail = all.filter(s => !myIds.includes(s.id));
-
-        list.innerHTML = avail.length ? avail.map(s => `
-            <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl mb-2">
-                <span class="font-bold text-slate-700">${s.full_name}</span>
-                <button onclick="linkStudent('${s.id}')" class="text-blue-600 font-bold text-xs uppercase">Добавить</button>
-            </div>`).join('') : '<div class="text-center text-slate-400">Нет доступных учеников</div>';
+    const modal = document.getElementById('hwModal');
+    if (modal) {
+        modal.classList.add('active'); // В твоем стиле используется класс active
     }
+}
+
+// ЭТИ ФУНКЦИИ ОСТАВЛЯЕМ КАК ЕСТЬ (они нужны для работы списка)
+async function openAddModal() {
+    document.getElementById('addModal').classList.add('active');
+    const list = document.getElementById('available-st-list');
+    list.innerHTML = 'Загрузка...';
+    const { data: all } = await _supabase.from('profiles').select('*').eq('role', 'student');
+    const { data: my } = await _supabase.from('schedule').select('student_id').eq('teacher_id', window.tid);
+    const myIds = my.map(s => s.student_id);
+    const avail = all.filter(s => !myIds.includes(s.id));
+
+    list.innerHTML = avail.length ? avail.map(s => `
+        <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl mb-2">
+            <span class="font-bold text-slate-700">${s.full_name}</span>
+            <button onclick="linkStudent('${s.id}')" class="text-blue-600 font-bold text-xs uppercase">Add</button>
+        </div>`).join('') : '<div class="text-center text-slate-400">Нет доступных учеников</div>';
+}
+
+async function linkStudent(sid) {
+    await _supabase.from('schedule').insert([{ teacher_id: window.tid, student_id: sid }]);
+    alert("Добавлен!"); closeModal('addModal'); loadData();
+}
 
     async function linkStudent(sid) {
         await _supabase.from('schedule').insert([{ teacher_id: window.tid, student_id: sid }]);
@@ -833,23 +957,34 @@ async function loadHomeDemoRequests() {
     const tableBody = document.getElementById('home-demo-requests-table');
     if (!tableBody) return;
 
-    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-20 text-slate-300 font-black uppercase italic animate-pulse">Синхронизация с базой...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-20 text-slate-300 font-black uppercase italic animate-pulse">Загрузка...</td></tr>';
 
     try {
-        // Убираем фильтр .eq(), чтобы база не выдавала ошибку "column does not exist"
+        // Выбираем данные из заявок и подтягиваем время из таблицы слотов
         const { data, error } = await _supabase
             .from('demo_requests')
-            .select('*') 
+            .select(`
+                *,
+                demo_slots ( start_time )
+            `)
+            .eq('archived', false) // Скрываем архивные
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
         if (!data || data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-24 text-slate-400 font-black uppercase text-xs">Записей в таблице нет</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-24 text-slate-400 font-black uppercase text-xs">Заявок пока нет</td></tr>';
             return;
         }
 
-        tableBody.innerHTML = data.map(req => `
+        tableBody.innerHTML = data.map(req => {
+            // Берем время из связанной таблицы
+            const slotTime = req.demo_slots ? req.demo_slots.start_time : null;
+            const dateDisplay = slotTime 
+                ? new Date(slotTime).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : 'Time not specified';
+
+            return `
             <tr class="group">
                 <td class="py-10 pl-12 bg-white rounded-l-[45px] shadow-sm group-hover:bg-blue-600 transition-all duration-300 border-y border-l border-slate-50">
                     <div class="flex items-center gap-6">
@@ -858,36 +993,45 @@ async function loadHomeDemoRequests() {
                         </div>
                         <div>
                             <div class="font-black text-slate-900 text-2xl group-hover:text-white leading-tight italic">
-                                Заявка #${req.id.toString().slice(0, 5)}
+                                ${req.full_name || 'Аноним'}
                             </div>
-                            <div class="text-[11px] text-slate-400 font-black uppercase group-hover:text-blue-200 tracking-widest">Проверка данных</div>
+                            <div class="text-[11px] text-slate-400 font-black uppercase group-hover:text-blue-200 tracking-widest">${req.course || 'Проверка данных'}</div>
                         </div>
                     </div>
                 </td>
                 <td class="py-10 px-8 bg-white shadow-sm group-hover:bg-blue-600 transition-all border-y border-slate-50 text-blue-600 font-black text-xl group-hover:text-white italic">
-                    ${req.student_phone || req.phone || 'Контакт скрыт'}
+                    ${req.phone || '---'}
                 </td>
                 <td class="py-10 px-8 bg-white shadow-sm group-hover:bg-blue-600 transition-all border-y border-slate-50">
                     <div class="flex items-center gap-3 text-slate-500 font-bold group-hover:text-blue-100 text-lg italic">
                         <i class="fa-regular fa-clock opacity-40 group-hover:opacity-100"></i>
-                        ${req.start_time ? new Date(req.start_time).toLocaleString('ru-RU') : 'Время не указано'}
+                        ${dateDisplay}
                     </div>
                 </td>
                 <td class="py-10 pr-12 bg-white rounded-r-[45px] shadow-sm group-hover:bg-blue-600 transition-all border-y border-r border-slate-50 text-right">
-                    <button class="bg-slate-900 text-white px-12 py-5 rounded-[22px] text-[11px] font-black uppercase group-hover:bg-white group-hover:text-blue-600 transition-all">
-                        Принять
+                    <button onclick="archiveRequest('${req.id}')" class="bg-slate-900 text-white px-12 py-5 rounded-[22px] text-[11px] font-black uppercase group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                        Accept
                     </button>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
 
     } catch (err) {
-        console.error("Критическая ошибка:", err);
-        tableBody.innerHTML = `<tr><td colspan="4" class="py-20 text-center">
-            <div class="text-red-500 font-black text-lg uppercase italic mb-2">Ошибка структуры таблицы</div>
-            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">${err.message}</div>
-        </td></tr>`;
+        console.error("Ошибка:", err);
     }
+}
+
+// И добавьте функцию для самой кнопки "Принять" (архив)
+async function archiveRequest(id) {
+    if (!confirm("Archive this request?")) return;
+    
+    const { error } = await _supabase
+        .from('demo_requests')
+        .update({ archived: true })
+        .eq('id', id);
+
+    if (error) alert(error.message);
+    else loadHomeDemoRequests();
 }
 </script>
 <div id="demo-lock-modal" class="fixed inset-0 z-[9999] flex items-center justify-center hidden">
@@ -942,6 +1086,67 @@ async function createAndBindLesson() {
         location.reload(); // Чтобы урок появился в списке
     }
 }
+// ... какой-то ваш код ...
+
+async function loadDemoSlots() {
+    const list = document.getElementById('demo-slots-list');
+    if(!list) return;
+    list.innerHTML = '<div class="col-span-2 text-center text-slate-400 py-10">Загрузка...</div>';
+    try {
+        const { data, error } = await _supabase
+            .from('demo_slots')
+            .select('*')
+            .eq('teacher_id', window.tid)
+            .order('start_time', { ascending: true });
+        
+        if(error) throw error;
+        
+        if(!data || data.length === 0) {
+            list.innerHTML = '<div class="col-span-2 text-center text-slate-300 py-10 bg-slate-50 rounded-3xl border border-dashed border-slate-200">Нет активных слотов</div>';
+            return;
+        }
+
+        list.innerHTML = data.map(s => {
+            const dateObj = new Date(s.start_time);
+            
+            // --- ИСПРАВЛЕНИЕ ТУТ ---
+            // Вместо автоматического пересчета в местное время (+3 часа), 
+            // берем чистые данные из UTC:
+            const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+            const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+            
+            // Для даты тоже лучше использовать UTC, чтобы день не "перепрыгнул" назад
+            const day = dateObj.getUTCDate().toString().padStart(2, '0');
+            const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+            const year = dateObj.getUTCFullYear();
+            const dateStr = `${day}.${month}.${year}`;
+            // ------------------------
+
+            return `
+            <div class="demo-card p-5 rounded-[25px] flex items-center justify-between bg-white shadow-sm border border-slate-50">
+                <div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Date</div>
+                    <div class="font-black text-slate-700 text-lg">${dateStr}</div>
+                </div>
+                <div class="text-right">
+                    <div class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-sm font-bold mb-2">${timeStr}</div>
+                    <button onclick="deleteDemoSlot('${s.id}')" class="text-red-400 hover:text-red-600 text-xs font-bold uppercase transition-colors"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        console.error("Ошибка:", err);
+    }
+}
+
+// 2. ВСТАВЛЯЕМ СЮДА (Функция удаления слотов)
+async function deleteDemoSlot(id) { 
+    if(!confirm("Удалить этот слот?")) return;
+    await _supabase.from('demo_slots').delete().eq('id', id); 
+    loadDemoSlots(); 
+}
+
 async function saveProfile() {
     const name = document.getElementById('edit-name').value;
     const phoneShort = document.getElementById('edit-phone').value;
@@ -958,8 +1163,9 @@ async function saveProfile() {
     btn.innerText = "...";
     btn.disabled = true;
 
-    // Собираем полный номер
-    const fullPhone = '+994' + phoneShort.replace(/\D/g, '');
+// Получаем код из списка и номер из поля
+const countryCode = document.getElementById('edit-country-code').value;
+const fullPhone = countryCode + phoneShort.replace(/\D/g, '');
 
     const { error } = await _supabase
         .from('profiles')
@@ -973,28 +1179,55 @@ async function saveProfile() {
 
     if (error) {
         console.error("Update error:", error);
-        alert("Ошибка при сохранении: " + error.message);
+        alert("Error saving profile: " + error.message);
     } else {
-        // Используем твой объект translations для уведомления
-        const msg = {
-            'RU': "Данные успешно обновлены!",
-            'AZ': "Məlumat yeniləndi!",
-            'EN': "Profile updated successfully!"
-        };
-        alert(msg[currentLang] || msg['EN']);
-        
-        // Обновляем текст в профиле (имя и телефон) сразу на экране
+        alert("Profile updated successfully!");
         if(document.getElementById('display-name-profile')) {
             document.getElementById('display-name-profile').innerText = name;
         }
-        
-        // Перезагружаем данные, чтобы всё синхронизировалось
         loadData();
     }
     
     btn.innerText = originalText;
     btn.disabled = false;
 }
+</script>
+<script>
+    // Helper functions added to support missing calls and mobile menu
+    function toggleMobileMenu() {
+        const el = document.getElementById('mobile-aside');
+        if (!el) return;
+        el.classList.toggle('-translate-x-full');
+        el.classList.toggle('translate-x-0');
+        document.body.classList.toggle('overflow-hidden');
+    }
+
+    function openModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+    }
+
+    // link modal helpers (generic wrappers)
+    function openLinkModal(id) {
+        openModal(id);
+    }
+    function closeLinkModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    }
+
+    // Unlink pair helper (calls Supabase to delete schedule mapping)
+    async function unlinkPair(sid) {
+        if (!sid) return;
+        if (!confirm('Отвязать ученика?')) return;
+        try {
+            await _supabase.from('schedule').delete().eq('teacher_id', window.tid).eq('student_id', sid);
+            if (typeof loadData === 'function') loadData();
+        } catch (err) {
+            console.error('unlinkPair error', err);
+            alert('Error: ' + (err.message || err));
+        }
+    }
 </script>
 </body>
 </html>

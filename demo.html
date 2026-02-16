@@ -5,8 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Demo Lesson | EduTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+#demo-date option {
+    background-color: #1e1b4b; /* Цвет фона карточки */
+    color: white;              /* Цвет текста */
+}
+/* Для Safari/Chrome на мобильных */
+#demo-date {
+    color: white !important;
+}
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
@@ -66,12 +75,22 @@
 
             <div>
                 <label class="block text-xs font-bold uppercase tracking-widest text-[#fbbf24] mb-2" data-lang-key="label-course">Choose Course</label>
-                <select id="course" class="w-full px-5 py-4 rounded-2xl">
+                <select id="course" class="w-full px-5 py-4 rounded-2xl appearance-none">
                     <option value="general" data-lang-key="subj-eng">General English</option>
                     <option value="ielts" data-lang-key="subj-ielts">IELTS Prep</option>
                     <option value="business" data-lang-key="subj-bus">Business English</option>
-                    <option value="kids">English for Kids</option>
+                    <option value="kids" data-lang-key="subj-kids">English for Kids</option>
                 </select>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-bold uppercase tracking-widest text-[#fbbf24] mb-2" data-lang-key="label-date">Available Dates</label>
+                <div class="relative">
+                    <i class="fa-solid fa-calendar-check absolute left-5 top-5 text-indigo-400"></i>
+                    <select id="demo-date" required class="w-full p-4 pl-12 rounded-2xl appearance-none cursor-pointer">
+                        <option value="" data-lang-key="loading">Loading dates...</option>
+                    </select>
+                </div>
             </div>
 
             <button type="submit" class="w-full bg-[#fbbf24] text-[#1e1b4b] py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition duration-300 shadow-xl shadow-yellow-500/20">
@@ -86,45 +105,161 @@
         </div>
     </div>
 
-    <script>
-        const translations = {
-            en: {
-                back: "Back to Home", "demo-h1": "Free Demo Class", "demo-p": "Try our platform and meet your teacher.",
-                "label-name": "Full Name", "label-phone": "WhatsApp / Phone", "label-course": "Course Interest",
-                "btn-send": "Claim My Free Lesson", "success-h": "Application Sent!", "success-p": "We will call you within 15 minutes.",
-                "subj-eng": "General English", "subj-ielts": "IELTS Prep", "subj-bus": "Business English"
-            },
-            ru: {
-                back: "На главную", "demo-h1": "Демо-урок", "demo-p": "Попробуйте платформу и познакомьтесь с учителем.",
-                "label-name": "Ваше имя", "label-phone": "WhatsApp / Телефон", "label-course": "Курс",
-                "btn-send": "Записаться бесплатно", "success-h": "Заявка отправлена!", "success-p": "Мы свяжемся с вами в течение 15 минут.",
-                "subj-eng": "Общий английский", "subj-ielts": "Подготовка к IELTS", "subj-bus": "Бизнес английский"
-            },
-            az: {
-                back: "Ana Səhifəyə", "demo-h1": "Ödənişsiz Demo", "demo-p": "Platformamızı yoxlayın və müəllimlə tanış olun.",
-                "label-name": "Adınız", "label-phone": "WhatsApp / Telefon", "label-course": "Kurs",
-                "btn-send": "Dərsimi bron et", "success-h": "Müraciət göndərildi!", "success-p": "Menecerimiz 15 dəqiqə ərzində sizinlə əlaqə saxlayacaq.",
-                "subj-eng": "Ümumi İngilis dili", "subj-ielts": "IELTS Hazırlığı", "subj-bus": "Biznes İngilis dili"
-            }
-        };
+<script>
+    // 1. Инициализация (Твои ключи)
+    const _supabase = supabase.createClient('https://jjeiytzftlmvpweaglvz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI');
 
-        function applyLang() {
-            const lang = localStorage.getItem('selectedLang') || 'en';
-            const t = translations[lang];
-            document.querySelectorAll('[data-lang-key]').forEach(el => {
-                const key = el.getAttribute('data-lang-key');
-                el.innerText = t[key];
-            });
+    const translations = {
+        en: {
+            back: "Back to Home", "demo-h1": "Free Demo Class", "demo-p": "Try our platform and meet your teacher.",
+            "label-name": "Full Name", "label-phone": "WhatsApp / Phone", "label-course": "Course Interest",
+            "btn-send": "Claim My Free Lesson", "success-h": "Application Sent!", "success-p": "We will call you within 15 minutes.",
+            "subj-eng": "General English", "subj-ielts": "IELTS Prep", "subj-bus": "Business English", "subj-kids": "English for Kids",
+            "label-date": "Available Dates", "loading": "Loading dates...", "no-slots": "No dates available", "select-default": "Choose a date"
+        },
+        ru: {
+            back: "На главную", "demo-h1": "Демо-урок", "demo-p": "Попробуйте платформу и познакомьтесь с учителем.",
+            "label-name": "Ваше имя", "label-phone": "WhatsApp / Телефон", "label-course": "Курс",
+            "btn-send": "Записаться бесплатно", "success-h": "Заявка отправлена!", "success-p": "Мы свяжемся с вами в течение 15 минут.",
+            "subj-eng": "Общий английский", "subj-ielts": "Подготовка к IELTS", "subj-bus": "Бизнес английский", "subj-kids": "Для детей",
+            "label-date": "Доступные даты", "loading": "Загрузка...", "no-slots": "Нет доступных дат", "select-default": "Выберите дату"
+        },
+        az: {
+            back: "Ana Səhifəyə", "demo-h1": "Ödənişsiz Demo", "demo-p": "Platformamızı yoxlayın və müəllimlə tanış olun.",
+            "label-name": "Adınız", "label-phone": "WhatsApp / Telefon", "label-course": "Kurs",
+            "btn-send": "Dərsimi bron et", "success-h": "Müraciət göndərildi!", "success-p": "Menecerimiz sizinlə tezliklə əlaqə saxlayacaq.",
+            "subj-eng": "Ümumi İngilis dili", "subj-ielts": "IELTS Hazırlığı", "subj-bus": "Biznes İngilis dili", "subj-kids": "Uşaqlar üçün",
+            "label-date": "Mövcud tarixlər", "loading": "Yüklənir...", "no-slots": "Mövcud tarix yoxdur", "select-default": "Tarix seçin"
+        }
+    };
+
+    function applyLang() {
+        const lang = localStorage.getItem('selectedLang') || 'en';
+        const t = translations[lang];
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (t[key]) el.innerText = t[key];
+        });
+    }
+
+async function loadAvailableSlots() {
+    const select = document.getElementById('demo-date');
+    const lang = localStorage.getItem('selectedLang') || 'en';
+
+    try {
+        console.log("Запрос к базе...");
+        const { data, error } = await _supabase
+            .from('demo_slots')
+            .select('*')
+            .eq('is_booked', false);
+
+        if (error) throw error;
+
+        console.log("Данные из базы:", data);
+
+        if (!data || data.length === 0) {
+            select.innerHTML = `<option value="">${translations[lang]['no-slots']}</option>`;
+            return;
         }
 
-        document.getElementById('demoForm').onsubmit = function(e) {
-            e.preventDefault();
-            this.classList.add('hidden');
-            document.getElementById('successMsg').classList.remove('hidden');
-            // Здесь можно добавить отправку данных в Supabase или Telegram
-        };
+        let html = `<option value="">${translations[lang]['select-default']}</option>`;
+        
+        // Фильтруем только будущие даты прямо в коде для надежности
+        const now = new Date();
 
-        window.onload = applyLang;
-    </script>
+data.forEach(slot => {
+            const rawDate = slot.start_time || slot.slot_at;
+            
+            if (rawDate) {
+                // Создаем объект даты
+                const dateObj = new Date(rawDate);
+                const now = new Date();
+                
+                // Проверяем, не прошла ли дата
+                if (dateObj > now) {
+                    // ИСПОЛЬЗУЕМ UTC МЕТОДЫ, ЧТОБЫ ВРЕМЯ НЕ СДВИГАЛОСЬ
+                    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+                    const monthNum = dateObj.getUTCMonth(); 
+                    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+                    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+
+                    // Словарь месяцев для разных языков
+                    const months = {
+                        ru: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+                        en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        az: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyun', 'İyul', 'Avq', 'Sen', 'Okt', 'Noy', 'Dek']
+                    };
+
+                    const monthName = months[lang] ? months[lang][monthNum] : months['en'][monthNum];
+                    
+                    // Формируем красивую строку: "15 фев, 10:00"
+                    const formatted = `${day} ${monthName}, ${hours}:${minutes}`;
+                    
+                    // Добавляем вариант в выпадающий список
+                    html += `<option value="${slot.id}" style="color: white !important; background-color: #1e1b4b !important;">${formatted}</option>`;
+                }
+            }
+        });
+
+        select.innerHTML = html;
+        console.log("Список обновлен успешно");
+
+    } catch (err) {
+        console.error("Критическая ошибка:", err);
+        select.innerHTML = `<option value="">Error: Database connection</option>`;
+    }
+}
+document.getElementById('demoForm').onsubmit = async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const course = document.getElementById('course').value;
+    const slotId = document.getElementById('demo-date').value; 
+
+    if (!slotId) {
+        alert("Please select a date!");
+        return;
+    }
+
+    try {
+        // 1. Отправляем заявку. ТЕПЕРЬ ТУТ slot_id
+        const { error: requestError } = await _supabase
+            .from('demo_requests')
+            .insert([{
+                full_name: name,
+                phone: phone,
+                course: course,
+                level: 'Not specified',
+                slot_id: slotId, // ИСПРАВЛЕНО с slot_it на slot_id
+                status: 'new'
+            }]);
+
+        if (requestError) throw requestError;
+
+        // 2. Помечаем время как занятое
+        const { error: slotError } = await _supabase
+            .from('demo_slots')
+            .update({ is_booked: true })
+            .eq('id', slotId);
+
+        if (slotError) throw slotError;
+
+        // 3. Успех
+        this.classList.add('hidden');
+        document.getElementById('successMsg').classList.remove('hidden');
+
+    } catch (err) {
+        console.error("Booking Error:", err);
+        // Выводим конкретную ошибку в alert для теста, если снова не сработает
+        alert("Error: " + (err.message || "Check RLS settings"));
+    }
+};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyLang();
+        loadAvailableSlots();
+    });
+</script>
 </body>
 </html>

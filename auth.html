@@ -29,14 +29,17 @@
 
         <div id="login-form" class="space-y-5">
             <div>
-                <label id="t-email-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Email</label>
-                <input type="email" id="email" placeholder="email@example.com" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+                <label id="t-email-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Логин / Email / Тел</label>
+                <input type="text" id="email" placeholder="admin или 50..." class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
             </div>
             <div>
                 <label id="t-pass-label" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
                 <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
             </div>
             <button onclick="handleLogin()" id="login-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-blue-600 transition-all uppercase tracking-widest text-sm text-center">Войти</button>
+            <div class="text-center">
+                <button id="t-forgot" onclick="openResetModal()" class="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-700">Забыли пароль?</button>
+            </div>
             <p class="text-center text-xs font-bold text-slate-400">
                 <span id="t-no-acc">Нет аккаунта?</span> 
                 <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-reg">Зарегистрироваться</button>
@@ -46,7 +49,7 @@
         <div id="register-form" class="space-y-5 hidden">
             <div>
                 <label id="t-reg-name" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Имя ученика</label>
-                <input type="text" id="reg-fullname" placeholder="Name and Surname" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
+                <input type="text" id="reg-fullname" placeholder="Name Surname" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
             </div>
             <div>
                 <label id="t-reg-email" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Email</label>
@@ -56,19 +59,12 @@
                 <label id="t-reg-pass" class="block text-xs font-black text-slate-500 uppercase ml-4 mb-2">Пароль</label>
                 <input type="password" id="reg-password-val" placeholder="••••••••" class="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium">
             </div>
-            <input type="hidden" id="reg-role-val" value="student">
-            
-            <button onclick="handleRegister()" id="reg-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all uppercase tracking-widest text-sm text-center">Создать профиль ученика</button>
+            <button onclick="handleRegister()" id="reg-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all uppercase tracking-widest text-sm text-center">Создать профиль</button>
             <p class="text-center text-xs font-bold text-slate-400">
                 <span id="t-have-acc">Уже есть аккаунт?</span> 
                 <button onclick="toggleForm()" class="text-blue-600 hover:underline" id="t-link-login">Войти</button>
             </p>
         </div>
-<div class="text-center mt-1">
-    <button onclick="openResetModal()" class="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-700">
-        Forgot password?
-    </button>
-</div>
 
         <div id="loader" class="hidden text-center py-4">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
@@ -76,54 +72,37 @@
         </div>
     </div>
 
+    <div id="reset-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[999]">
+        <div class="bg-white p-8 rounded-[35px] max-w-sm w-full shadow-2xl border border-slate-100 text-center">
+            <h3 id="t-reset-title" class="font-black text-2xl text-slate-800 mb-2">Сброс пароля</h3>
+            <p id="t-reset-desc" class="text-slate-500 text-xs mb-6 leading-relaxed">Введите email для получения ссылки.</p>
+            <input type="email" id="reset-email" placeholder="Email" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl mb-4 outline-none focus:ring-2 ring-blue-500 text-sm">
+            <button onclick="sendResetLink()" id="btn-reset-go" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-[2px] shadow-lg hover:bg-blue-700 transition-all">Отправить</button>
+            <button onclick="closeResetModal()" id="t-reset-cancel" class="w-full mt-4 text-slate-400 text-[9px] font-black uppercase tracking-widest">Отмена</button>
+        </div>
+    </div>
+
     <script>
         const _supabase = supabase.createClient("https://jjeiytzftlmvpweaglvz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZWl5dHpmdGxtdnB3ZWFnbHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODY5OTAsImV4cCI6MjA4NjA2Mjk5MH0.kvUjwknKvHG6Xp7xg9w7oM8kn2AaggdxxhHvTsjatJI");
 
-const translations = {
+        const translations = {
             ru: { 
-                subtitle: "Панель управления", 
-                email: "Email или Телефон", 
-                ph_email: "example@mail.com или 50...",
-                pass: "Пароль", 
-                ph_pass: "••••••••",
-                btn: "Войти", 
-                noAcc: "Нет аккаунта?", 
-                linkReg: "Зарегистрироваться", 
-                regName: "Имя ученика", 
-                regBtn: "Создать профиль ученика", 
-                haveAcc: "Есть аккаунт?", 
-                linkLogin: "Войти", 
-                loading: "Загрузка..." 
+                subtitle: "Панель управления", email: "Логин / Email / Тел", pass: "Пароль", btn: "Войти", 
+                noAcc: "Нет аккаунта?", linkReg: "Регистрация", regName: "Имя ученика", regBtn: "Создать профиль", 
+                haveAcc: "Есть аккаунт?", linkLogin: "Войти", loading: "Загрузка...", forgot: "Забыли пароль?",
+                resetTitle: "Сброс пароля", resetDesc: "Введите email для получения ссылки", resetBtn: "Отправить", resetCancel: "Отмена"
             },
             en: { 
-                subtitle: "Management Panel", 
-                email: "Email or Phone", 
-                ph_email: "Email or 50...",
-                pass: "Password", 
-                ph_pass: "••••••••",
-                btn: "Sign In", 
-                noAcc: "No account?", 
-                linkReg: "Student Signup", 
-                regName: "Student Name", 
-                regBtn: "Create Student Profile", 
-                haveAcc: "Have account?", 
-                linkLogin: "Login", 
-                loading: "Processing..." 
+                subtitle: "Management Panel", email: "Login / Email / Phone", pass: "Password", btn: "Sign In", 
+                noAcc: "No account?", linkReg: "Signup", regName: "Student Name", regBtn: "Create Profile", 
+                haveAcc: "Have account?", linkLogin: "Login", loading: "Processing...", forgot: "Forgot password?",
+                resetTitle: "Reset Password", resetDesc: "Enter your email for recovery link", resetBtn: "Send Link", resetCancel: "Cancel"
             },
             az: { 
-                subtitle: "İdarəetmə Paneli", 
-                email: "Email və ya Telefon", 
-                ph_email: "Email və ya 50...",
-                pass: "Şifrə", 
-                ph_pass: "••••••••",
-                btn: "Daxil ol", 
-                noAcc: "Hesab yoxdur?", 
-                linkReg: "Qeydiyyat", 
-                regName: "Tələbə adı", 
-                regBtn: "Tələbə hesabı yarat", 
-                haveAcc: "Hesabınız var?", 
-                linkLogin: "Daxil ol", 
-                loading: "Gözləyin..." 
+                subtitle: "İdarəetmə Paneli", email: "Logın / Email / Tel", pass: "Şifrə", btn: "Daxil ol", 
+                noAcc: "Hesab yoxdur?", linkReg: "Qeydiyyat", regName: "Tələbə adı", regBtn: "Hesab yarat", 
+                haveAcc: "Hesabınız var?", linkLogin: "Daxil ol", loading: "Gözləyin...", forgot: "Şifrəni unutmusunuz?",
+                resetTitle: "Şifrənin yenilənməsi", resetDesc: "Bərpa linki üçün email daxil edin", resetBtn: "Göndər", resetCancel: "Ləğv et"
             }
         };
 
@@ -143,7 +122,14 @@ const translations = {
             document.getElementById('t-have-acc').innerText = t.haveAcc;
             document.getElementById('t-link-login').innerText = t.linkLogin;
             document.getElementById('t-loading').innerText = t.loading;
+            document.getElementById('t-forgot').innerText = t.forgot;
             
+            // Перевод модалки
+            document.getElementById('t-reset-title').innerText = t.resetTitle;
+            document.getElementById('t-reset-desc').innerText = t.resetDesc;
+            document.getElementById('btn-reset-go').innerText = t.resetBtn;
+            document.getElementById('t-reset-cancel').innerText = t.resetCancel;
+
             ['ru', 'en', 'az'].forEach(l => {
                 const btn = document.getElementById('btn-' + l);
                 btn.className = (l === lang) ? "px-3 py-1 rounded-xl text-xs font-black bg-blue-600 text-white shadow-md" : "px-3 py-1 rounded-xl text-xs font-black text-slate-600 hover:bg-white";
@@ -155,215 +141,93 @@ const translations = {
             document.getElementById('register-form').classList.toggle('hidden');
         }
 
-// 1. ФУНКЦИЯ РЕГИСТРАЦИИ (Оставляем её, она важна!)
-async function handleRegister() {
-    const name = document.getElementById('reg-fullname').value;
-    const email = document.getElementById('reg-email-val').value;
-    const pass = document.getElementById('reg-password-val').value;
-    const role = "student"; 
-
-    if(!name || !email || !pass) { alert("Заполните все поля"); return; }
-
-    showLoader(true);
-    const { data: aData, error: aErr } = await _supabase.auth.signUp({ email, password: pass });
-    if(aErr) { alert(aErr.message); showLoader(false); return; }
-
-    const { error: pErr } = await _supabase.from('profiles').insert([{
-        id: aData.user.id,
-        full_name: name,
-        username: email,
-        role: role
-    }]);
-
-    if(pErr) { alert(pErr.message); showLoader(false); return; }
-
-    const savedTest = localStorage.getItem('lastTestResult');
-    if (savedTest) {
-        try {
-            const testObj = JSON.parse(savedTest);
-            await _supabase.from('test_results').insert([{
-                student_name: name,
-                score: testObj.points,
-                wrong_answers: testObj.wrong,
-                total_questions: testObj.total,
-                time_taken: testObj.time,
-                answers_detail: testObj.details,
-                user_id: aData.user.id
-            }]);
-            localStorage.removeItem('lastTestResult');
-        } catch (e) {
-            console.error("Ошибка при сохранении теста:", e);
+        function showLoader(show) {
+            const loader = document.getElementById('loader');
+            const loginForm = document.getElementById('login-form');
+            if(loader) loader.classList.toggle('hidden', !show);
+            if(loginForm) loginForm.classList.toggle('hidden', show);
         }
-    }
-    
-    alert("Аккаунт создан! Теперь войдите.");
-    location.reload();
-}
 
-// 2. ТВОЯ НОВАЯ ФУНКЦИЯ ВХОДА (Email + Телефон)
-async function handleLogin() {
-    const loginInput = document.getElementById('email').value.trim(); 
-    const pass = document.getElementById('password').value;
-    
-    if(!loginInput || !pass) {
-        alert("Заполните все поля");
-        return;
-    }
+        async function handleLogin() {
+            const input = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            if(!input || !pass) return alert("Fill all fields");
 
-    showLoader(true);
-    let emailForAuth = loginInput;
+            showLoader(true);
+            let emailForAuth = input;
 
-    // Проверка на номер телефона
-    if (!loginInput.includes('@')) {
-        let cleanPhone = loginInput.replace(/\D/g, '');
-        if (cleanPhone.length === 9) cleanPhone = '994' + cleanPhone;
-        if (cleanPhone.length === 10 && cleanPhone.startsWith('0')) cleanPhone = '994' + cleanPhone.substring(1);
+            if (!input.includes('@')) {
+                let query = _supabase.from('profiles').select('username, phone');
 
-        const formattedPhone = '+' + cleanPhone;
+                // Продвинутая логика телефона (3 варианта)
+                if (/^\+?\d+$/.test(input)) {
+                    let digits = input.replace(/\D/g, '');
+                    let variants = [];
+                    
+                    if (input.startsWith('+')) {
+                        variants.push(input); // Вариант 1: Полный +994...
+                    } else if (input.startsWith('0') && digits.length === 10) {
+                        variants.push('+994' + digits.substring(1)); // Вариант 2: 055... -> +99455...
+                    } else if (digits.length === 9) {
+                        variants.push('+994' + digits); // Вариант 3: 55... -> +99455...
+                    } else {
+                        variants.push('+' + digits); // На всякий случай для других стран
+                    }
+                    query = query.in('phone', variants);
+                } else {
+                    // Псевдоним (full_name)
+                    query = query.eq('full_name', input);
+                }
 
-        const { data: userProfile, error: profileError } = await _supabase
-            .from('profiles')
-            .select('username') 
-            .eq('phone', formattedPhone)
-            .single();
+                const { data: profile, error } = await query.maybeSingle();
 
-        if (profileError || !userProfile) {
-            alert("Пользователь с таким номером телефона не найден");
-            showLoader(false);
-            return;
-        }
-        emailForAuth = userProfile.username;
-    }
-
-    const { data, error } = await _supabase.auth.signInWithPassword({ 
-        email: emailForAuth, 
-        password: pass 
-    });
-
-    if(error) { 
-        alert("Ошибка входа: " + error.message); 
-        showLoader(false); 
-        return; 
-    }
-
-    const { data: p } = await _supabase.from('profiles').select('role').eq('id', data.user.id).single();
-    if(p) {
-        if(p.role === 'admin') window.location.href = 'admin.html';
-        else if(p.role === 'teacher') window.location.href = 'teacher.html';
-        else window.location.href = 'student.html';
-    }
-}
-
-// 3. ФУНКЦИЯ ЛОАДЕРА (Обязательно оставь, иначе login упадет с ошибкой)
-// ... ваш предыдущий код (supabase init и т.д.) ...
-
-    function showLoader(show) {
-        const loader = document.getElementById('loader');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        
-        if(loader) loader.classList.toggle('hidden', !show);
-        if(loginForm) loginForm.classList.toggle('hidden', show);
-        if(registerForm) registerForm.classList.add('hidden');
-    }
-
-    window.onload = () => { 
-        setLang(localStorage.getItem('selectedLang') || 'en'); 
-    };
-
-    // --- ОБЯЗАТЕЛЬНО ДОБАВЬТЕ ЭТИ ФУНКЦИИ ВНУТРЬ ТЕГА <SCRIPT> ---
-    
-    function openResetModal() {
-        document.getElementById('reset-modal').classList.remove('hidden');
-    }
-
-    function closeResetModal() {
-        document.getElementById('reset-modal').classList.add('hidden');
-    }
-
-    async function sendResetLink() {
-        const email = document.getElementById('reset-email').value;
-        const btn = document.getElementById('btn-reset');
-
-        if (!email) return alert("Please enter your email!");
-
-        btn.innerText = "SENDING...";
-        btn.disabled = true;
-
-        try {
-            const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-                // redirectTo: https://14shako.github.io/Edu-track/
-                redirectTo: window.location.origin + window.location.pathname,
-            });
-
-            if (error) throw error;
-
-            alert("Success! Check your email for the recovery link.");
-            closeResetModal();
-        } catch (err) {
-            alert("Error: " + err.message);
-        } finally {
-            btn.innerText = "SEND RESET LINK";
-            btn.disabled = false;
-        }
-    }
-// Функция для проверки, не пришел ли пользователь по ссылке для сброса пароля
-async function handlePasswordReset() {
-    // 1. Проверяем наличие хэша в URL (там Supabase передает токены)
-    const hash = window.location.hash;
-
-    if (hash && hash.includes("type=recovery")) {
-        // 2. Спрашиваем новый пароль (можно сделать через prompt для простоты или красивое окно)
-        const newPassword = prompt("Please enter your NEW password:");
-
-        if (newPassword && newPassword.length >= 6) {
-            try {
-                // 3. Отправляем новый пароль в Supabase
-                const { error } = await _supabase.auth.updateUser({
-                    password: newPassword
-                });
-
-                if (error) throw error;
-
-                alert("Success! Password updated. Now you can log in with your new password.");
-                
-                // Очищаем хэш в адресе и обновляем страницу, чтобы форма логина стала чистой
-                window.location.hash = "";
-                window.location.href = window.location.origin + window.location.pathname;
-
-            } catch (err) {
-                alert("Error updating password: " + err.message);
+                if (error || !profile) {
+                    alert("User not found / İstifadəçi tapılmadı");
+                    showLoader(false);
+                    return;
+                }
+                emailForAuth = profile.username;
             }
-        } else if (newPassword) {
-            alert("Password must be at least 6 characters!");
+
+            const { data, error: authErr } = await _supabase.auth.signInWithPassword({ email: emailForAuth, password: pass });
+            if(authErr) { alert(authErr.message); showLoader(false); return; }
+
+            const { data: p } = await _supabase.from('profiles').select('role').eq('id', data.user.id).single();
+            if(p.role === 'admin') window.location.href = 'admin.html';
+            else if(p.role === 'teacher') window.location.href = 'teacher.html';
+            else window.location.href = 'student.html';
         }
-    }
-}
 
-// Запускаем проверку сразу при загрузке страницы
-window.addEventListener('load', handlePasswordReset);
-// И на случай, если страница уже открыта, а хэш изменился
-window.addEventListener('hashchange', handlePasswordReset);
-</script>
+        async function handleRegister() {
+            const name = document.getElementById('reg-fullname').value;
+            const email = document.getElementById('reg-email-val').value;
+            const pass = document.getElementById('reg-password-val').value;
+            if(!name || !email || !pass) return alert("Fill all fields");
+            showLoader(true);
+            const { data, error } = await _supabase.auth.signUp({ email, password: pass });
+            if(error) { alert(error.message); showLoader(false); return; }
+            await _supabase.from('profiles').insert([{ id: data.user.id, full_name: name, username: email, role: 'student' }]);
+            alert("Success!"); location.reload();
+        }
 
-<div id="reset-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[999]">
-    <div class="bg-white p-8 rounded-[35px] max-w-sm w-full shadow-2xl border border-slate-100">
-        <h3 class="font-black text-2xl text-slate-800 mb-2">Reset Password</h3>
-        <p class="text-slate-500 text-xs mb-6 leading-relaxed">Enter your email and we'll send you a secure link to restore access.</p>
-        
-        <input type="email" id="reset-email" placeholder="Your Email" 
-               class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl mb-4 outline-none focus:ring-2 ring-blue-500 text-sm">
-        
-        <button onclick="sendResetLink()" id="btn-reset" 
-                class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-[2px] shadow-lg hover:bg-blue-700 transition-all">
-            Send Reset Link
-        </button>
-        
-        <button onclick="closeResetModal()" class="w-full mt-4 text-slate-400 text-[9px] font-black uppercase tracking-widest">
-            Cancel
-        </button>
-    </div>
-</div>
+        function openResetModal() { document.getElementById('reset-modal').classList.remove('hidden'); }
+        function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
 
+        async function sendResetLink() {
+            const email = document.getElementById('reset-email').value;
+            if(!email) return alert("Enter email");
+            const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            if(error) alert(error.message); else { alert("Sent!"); closeResetModal(); }
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!document.getElementById('register-form').classList.contains('hidden')) handleRegister();
+                else handleLogin();
+            }
+        });
+
+        window.onload = () => { setLang(localStorage.getItem('selectedLang') || 'ru'); };
+    </script>
 </body>
 </html>

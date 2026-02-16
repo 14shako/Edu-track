@@ -8,7 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        * { box-sizing: border-box; }
+        body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; height: 100%; }
         .scroll-container { height: 100vh; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
         .section { position: relative; height: 100vh; width: 100%; display: flex; flex-direction: column; scroll-snap-align: start; background-size: cover; background-position: center; }
         .section::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(79, 70, 229, 0.7)); z-index: 1; }
@@ -55,6 +56,127 @@
         .footer-nav { display: flex; gap: 20px; align-items: center; margin-right: 30px; }
         .footer-link { color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.6; transition: 0.3s; }
         .footer-link:hover { opacity: 1; color: #fbbf24; }
+        /* Mobile helpers (only affect <=768px) */
+        #burger-btn { display: none; }
+        .table-wrapper { -webkit-overflow-scrolling: touch; }
+        /* Mobile-only elements hidden by default */
+        #mobile-left { display: none; }
+        #mobile-logo { display: none; }
+        .mobile-only { display: none; }
+
+        @media (max-width: 768px) {
+            /* Collapse top nav into a left overlay panel on mobile */
+            nav {
+                transform: translateX(-100%);
+                transition: transform 0.28s ease;
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 16rem;
+                padding: 3.5rem 1.25rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                background: linear-gradient(to bottom, rgba(30,27,75,0.95), rgba(79,70,229,0.95));
+                z-index: 60;
+            }
+
+            nav.mobile-open { transform: translateX(0); }
+
+            /* Show burger and overlay on mobile */
+            #burger-btn {
+                display: flex;
+                position: fixed;
+                left: 0.75rem;
+                top: 0.75rem;
+                z-index: 70;
+                background: white;
+                border-radius: 10px;
+                width: 44px;
+                height: 44px;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            }
+
+            #mobile-overlay { display: none; }
+            #mobile-overlay.block { display: block; }
+
+            /* Make hero/body content compact */
+            .hero-body { padding: 1rem; }
+            .hero-body h1 { font-size: 1.6rem; }
+            .hero-body p { font-size: 0.95rem; padding-left: 12px; }
+
+            /* Reduce gaps and stack video playlist */
+            .video-event-wrapper { flex-direction: column; gap: 12px; width: 100%; }
+            .video-playlist { flex-direction: row; overflow-x: auto; gap: 8px; }
+
+            /* Teachers grid: single column compact */
+            .teachers-grid { grid-template-columns: 1fr !important; gap: 14px; }
+
+            /* Prevent page horizontal scroll; tables scroll internally */
+            .table-wrapper { overflow-x: auto; width: 100%; }
+            table { width: 100%; border-collapse: collapse; }
+            body, html { overflow-x: hidden; }
+
+            /* Make nav contents comfortable on small screens */
+            nav { overflow-y: auto; padding-top: 3.5rem; }
+            /* Hide original desktop logo in mobile panel (we show a mobile logo next to burger) */
+            nav .logo { display: none; }
+            /* Hide desktop nav blocks; show mobile-only panel instead */
+            nav .nav-left, nav .nav-right { display: none; }
+            .mobile-only { display: none; }
+            /* Mobile-left (burger + mobile logo) */
+            #mobile-left { display: flex; position: fixed; left: 0.75rem; top: 0.75rem; z-index: 71; }
+            #mobile-logo { display: block; color: white; font-size: 16px; }
+
+            /* Mobile panel content (visible only inside slide-in nav) */
+            .mobile-only { display: block; padding-top: 0; }
+            .mobile-only .mobile-login { margin-bottom: 12px; }
+            .mobile-only .mobile-links { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+            .mobile-only .mobile-links a { display: block; padding: 12px 14px; border-radius: 10px; color: white; text-decoration: none; font-weight:700; background: transparent; }
+            .mobile-only .mobile-links a:hover { background: rgba(255,255,255,0.04); }
+            .mobile-only .mobile-lang { display:flex; gap:8px; }
+            .lang-btn { padding: 8px 10px; font-size: 13px; }
+        }
+
+        /* Desktop-only behavior: keep previous overflow locked for larger screens */
+        @media (min-width: 768px) {
+            body, html { overflow: hidden; }
+        }
+
+        /* Mobile-specific overrides and fixes (screens <768px) */
+        @media (max-width: 768px) {
+            /* Ensure no horizontal scrolling and allow vertical scrolling so footer is reachable */
+            body, html { overflow-x: hidden; overflow-y: auto; height: auto; }
+
+            /* Make each section auto-height so content doesn't overlap */
+            .section { height: auto !important; min-height: 100vh; scroll-snap-align: none; }
+            .scroll-container { scroll-snap-type: none; }
+
+            /* Center logo on mobile and keep burger fixed left */
+            #mobile-logo { display: block !important; position: fixed !important; left: 50% !important; transform: translateX(-50%) !important; top: 0.75rem !important; z-index: 72 !important; color: white !important; font-weight:900 !important; font-style:italic !important; margin-left: 0 !important; }
+            #mobile-left { display: flex; align-items: center; gap: 8px; }
+            #burger-btn { display: flex !important; position: fixed !important; left: 0.75rem !important; top: 0.75rem !important; z-index: 73 !important; }
+
+            /* Keep the overlay behind the menu button and allow menu to open */
+            nav.mobile-open { padding-top: 3.5rem; }
+
+            /* Footer: ensure it's fully visible and has enough bottom padding */
+            footer { padding-bottom: 64px !important; box-sizing: border-box; width: 100%; }
+
+            /* Ensure media elements don't overflow horizontally */
+            img, video { max-width: 100%; height: auto; }
+
+            /* Make primary containers full width and centered text where appropriate */
+            .hero-body { padding: 1rem; text-align: center; }
+            .hero-body h1 { font-size: 1.6rem; }
+            .hero-body p { font-size: 0.95rem; padding-left: 12px; }
+            .video-event-wrapper { flex-direction: column; gap: 12px; width: 100%; }
+            .video-playlist { flex-direction: row; overflow-x: auto; gap: 8px; }
+            .teachers-grid { grid-template-columns: 1fr !important; gap: 14px; }
+        }
     </style>
 </head>
 <body>
@@ -75,6 +197,26 @@
                 <button onclick="changeLang('az')" id="l-az" class="lang-btn">AZ</button>
             </div>
             <a href="auth.html" class="btn-login" data-lang-key="login">Login</a>
+        </div>
+        <!-- Mobile-only panel: login -> links -> language (visible only on mobile) -->
+        <div class="mobile-only" aria-hidden="true">
+            <div class="mobile-login">
+                <a href="auth.html" class="btn-login" onclick="closeMobileMenu()">Login</a>
+            </div>
+            <div class="mobile-links">
+                <a href="index.html" class="mobile-link" data-lang-key="home" onclick="closeMobileMenu()">Home</a>
+                <a href="demo.html" class="mobile-link" data-lang-key="demo" onclick="closeMobileMenu()">Demo Lesson</a>
+                <a href="javascript:void(0)" onclick="scrollToSection(4);closeMobileMenu()" class="mobile-link" data-lang-key="nav-events">Events</a>
+                <a href="javascript:void(0)" onclick="scrollToSection(3);closeMobileMenu()" class="mobile-link" data-lang-key="nav-teachers">Teachers</a>
+                <a href="test.html" class="mobile-link" data-lang-key="nav-test" onclick="closeMobileMenu()">Check Level</a>
+            </div>
+            <div class="mobile-lang">
+                <div class="lang-switcher">
+                    <button onclick="changeLang('en')" id="ml-en" class="lang-btn active">EN</button>
+                    <button onclick="changeLang('ru')" id="ml-ru" class="lang-btn">RU</button>
+                    <button onclick="changeLang('az')" id="ml-az" class="lang-btn">AZ</button>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -205,6 +347,15 @@
         </section>
     </div>
 
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/40 z-50" onclick="closeMobileMenu()"></div>
+
+    <div id="mobile-left" style="align-items:center; gap:8px;">
+        <button id="burger-btn" aria-label="Open menu" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div id="mobile-logo" style="font-weight:900; color:#1e1b4b; font-style:italic; margin-left:6px;">EDUTRACK</div>
+    </div>
+
     <script>
         const translations = {
             en: {
@@ -277,7 +428,13 @@
                 if(titleEl) titleEl.innerText = t["v-title-" + (index+1)];
             });
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('l-' + lang).classList.add('active');
+            // Mark desktop lang button active (if present)
+            const desktopBtn = document.getElementById('l-' + lang);
+            if (desktopBtn) desktopBtn.classList.add('active');
+            // Also mark any mobile lang buttons by matching their label text (EN/ru/az)
+            document.querySelectorAll('.lang-btn').forEach(b => {
+                if (b.innerText && b.innerText.trim().toLowerCase() === lang.toLowerCase()) b.classList.add('active');
+            });
         }
 
         function scrollToSection(index) {
@@ -287,9 +444,63 @@
         document.getElementById('scroll-container').addEventListener('scroll', function() {
             const index = Math.round(this.scrollTop / window.innerHeight);
             document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
+            // Fade mobile-centered logo as user scrolls down (visible only at very top)
+            const mobileLogo = document.getElementById('mobile-logo');
+            if (mobileLogo) {
+                const fade = Math.max(0, 1 - (this.scrollTop / 120));
+                mobileLogo.style.opacity = fade;
+                mobileLogo.style.transition = 'opacity 220ms ease-out';
+            }
         });
 
         window.onload = () => changeLang(localStorage.getItem('selectedLang') || 'en');
+    </script>
+    <script>
+        // Mobile menu toggle helpers and table wrapper
+        function toggleMobileMenu() {
+            const nav = document.querySelector('nav');
+            const overlay = document.getElementById('mobile-overlay');
+            if (!nav) return;
+            if (nav.classList.contains('mobile-open')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        function openMobileMenu() {
+            const nav = document.querySelector('nav');
+            const overlay = document.getElementById('mobile-overlay');
+            if (!nav) return;
+            nav.classList.add('mobile-open');
+            if (overlay) { overlay.classList.remove('hidden'); overlay.classList.add('block'); }
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            const nav = document.querySelector('nav');
+            const overlay = document.getElementById('mobile-overlay');
+            if (!nav) return;
+            nav.classList.remove('mobile-open');
+            if (overlay) { overlay.classList.remove('block'); overlay.classList.add('hidden'); }
+            document.body.style.overflow = '';
+        }
+
+        // Wrap any tables with a scroll container to avoid page horizontal scroll
+        function wrapTablesForMobile() {
+            document.querySelectorAll('table').forEach(tbl => {
+                if (!tbl.parentElement) return;
+                if (tbl.parentElement.classList.contains('table-wrapper')) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-wrapper';
+                tbl.parentElement.insertBefore(wrapper, tbl);
+                wrapper.appendChild(tbl);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            wrapTablesForMobile();
+        });
     </script>
 </body>
 </html>

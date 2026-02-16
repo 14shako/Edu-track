@@ -22,11 +22,30 @@
         .page-section { display: none; }
         .page-section.active { display: block; }
         .nav-link.active { background: #2563eb !important; color: white !important; }
+        /* Мобильная адаптация */
+        aside { z-index: 40; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 39; }
+        .menu-btn { display: none; }
+        @media (max-width: 767px) {
+            body { flex-direction: column; }
+            aside { position: fixed; left: 0; top: 0; width: 64; height: 100vh; transform: translateX(-100%); transition: transform 0.3s ease; }
+            aside.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
+            .menu-btn { display: flex; }
+            main { margin-left: 0 !important; padding: 4px !important; }
+            .header-row { gap: 0.5rem !important; }
+            .header-row button { padding: 0.5rem 0.75rem !important; font-size: 0.875rem !important; }
+            table { font-size: 0.75rem !important; }
+            table th, table td { padding: 0.5rem !important; }
+            .stat-card { padding: 1rem !important; }
+            .text-3xl { font-size: 1.875rem !important; }
+        }
     </style>
 </head>
 <body class="flex min-h-screen">
-
-    <aside class="w-64 bg-slate-800 text-white flex flex-col p-6 fixed h-full shadow-xl">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
+    
+    <aside class="w-64 bg-slate-800 text-white flex flex-col p-6 fixed h-full shadow-xl" id="sidebar">
         <div class="text-2xl font-bold mb-10 text-blue-400 tracking-tight italic">
             <i class="fa-solid fa-graduation-cap mr-2"></i>EDUTRACK
         </div>
@@ -58,8 +77,11 @@
         </button>
     </aside>
 
-    <main class="flex-1 ml-64 p-8">
-        <div class="flex justify-between items-center mb-8">
+    <main class="flex-1 md:ml-64 p-8">
+        <div class="flex justify-between items-center mb-8 header-row">
+            <button onclick="toggleMenu()" class="menu-btn bg-slate-800 text-white p-3 rounded-xl md:hidden">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
             <h1 id="page-title-text" class="text-3xl font-bold text-slate-800" data-i18n="nav-dash">Панель управления</h1>
             <div class="flex gap-3">
                 <button onclick="openLinkModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">
@@ -71,7 +93,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-10">
             <div class="stat-card bg-white p-5 rounded-3xl text-center border">
                 <div class="text-slate-400 text-[10px] uppercase font-bold mb-2" data-i18n="stat-all">Всего</div>
                 <div id="stat-all" class="text-3xl font-black text-slate-800">0</div>
@@ -95,30 +117,35 @@
         </div>
 
         <div id="page-dashboard" class="page-section active space-y-8">
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-x-auto">
                 <div class="p-4 bg-slate-800 text-white font-bold text-xs uppercase" data-i18n="conn-title">Active Connections</div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
                         <tr><th class="p-4" data-i18n="th-teacher">Teacher</th><th class="p-4" data-i18n="th-student">Student</th><th class="p-4 text-right" data-i18n="th-action">Action</th></tr>
                     </thead>
                     <tbody id="connections-list" class="divide-y"></tbody>
                 </table>
+                </div>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-x-auto">
                 <div class="p-4 bg-slate-50 border-b text-slate-400 text-[10px] font-bold uppercase" data-i18n="list-all">Пользователи системы</div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
                         <tr><th class="p-4" data-i18n="th-name">Имя Фамилия</th><th class="p-4">Email</th><th class="p-4" data-i18n="th-status">Статус</th><th class="p-4 text-right" data-i18n="th-action">Действие</th></tr>
                     </thead>
                     <tbody id="all-users-list" class="divide-y"></tbody>
                 </table>
+                </div>
             </div>
         </div>
 
         <div id="page-attendance" class="page-section space-y-4">
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-x-auto">
                 <div class="p-4 bg-emerald-600 text-white font-bold text-xs uppercase tracking-widest" data-i18n="nav-att">Журнал посещаемости</div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
                         <tr>
@@ -131,12 +158,14 @@
                     </thead>
                     <tbody id="admin-attendance-list" class="divide-y"></tbody>
                 </table>
+                </div>
             </div>
         </div>
 
         <div id="page-test-results" class="page-section">
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-x-auto">
                 <div class="p-4 bg-orange-500 text-white font-bold text-xs uppercase tracking-widest" data-i18n="nav-tests">Entrance Test Results</div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
                         <tr>
@@ -149,12 +178,14 @@
                     </thead>
                     <tbody id="test-results-list" class="divide-y"></tbody>
                 </table>
+                </div>
             </div>
         </div>
         
         <div id="page-teachers" class="page-section">
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-x-auto">
                 <div class="p-4 bg-indigo-600 text-white font-bold text-xs uppercase" data-i18n="nav-teachers">Список Учителей</div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
     <tr>
@@ -166,18 +197,21 @@
 </thead>
                     <tbody id="teacher-list" class="divide-y"></tbody>
                 </table>
+                </div>
             </div>
         </div>
 
         <div id="page-students" class="page-section">
-            <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-sm border overflow-x-auto">
                 <div class="p-4 bg-blue-600 text-white font-bold text-xs uppercase" data-i18n="nav-students">Список Учеников</div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400 font-bold tracking-widest">
                         <tr><th class="p-4" data-i18n="th-name">Имя Фамилия</th><th class="p-4" data-i18n="th-level">Уровень</th><th class="p-4" data-i18n="th-status">Статус</th><th class="p-4 text-right" data-i18n="th-action">Действие</th></tr>
                     </thead>
                     <tbody id="student-list" class="divide-y"></tbody>
                 </table>
+                </div>
             </div>
         </div>
     </main>
@@ -527,18 +561,62 @@ function renderTeachers(arr, schedule) {
             }).join('');
         }
 
-        async function unlinkPair(id) { if(confirm("Удалить связь?")) { await _supabase.from('schedule').delete().eq('id', id); loadData(); } }
-        async function deleteUser(id) { if(confirm("Удалить пользователя?")) { await _supabase.from('profiles').delete().eq('id', id); loadData(); } }
-        function openModal() { document.getElementById('userModal').classList.add('active'); toggleRoleFields(); }
-        function closeModal() { document.getElementById('userModal').classList.remove('active'); }
-        function openLinkModal() {
-            const ts = usersArr.filter(u => u.role === 'teacher');
-            const ss = usersArr.filter(u => u.role === 'student');
-            document.getElementById('link_teacher').innerHTML = ts.map(t => `<option value="${t.id}">${t.full_name} (${t.subject})</option>`).join('');
-            document.getElementById('link_student').innerHTML = ss.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
-            document.getElementById('linkModal').classList.add('active');
-        }
-        function closeLinkModal() { document.getElementById('linkModal').classList.remove('active'); }
+async function deleteUser(id) {
+    const currentLang = localStorage.getItem('selectedLang') || 'ru';
+
+    const confirmMsg = 
+        currentLang === 'az' ? 'Bu istifadəçini və onun bütün məlumatlarını (ev tapşırıqları, davamiyyət, cədvəl) silmək istəyirsiniz?' : 
+        currentLang === 'en' ? 'Delete this user and all related data (homework, attendance, schedule)?' : 
+        'Удалить пользователя и все его данные (ДЗ, посещаемость, расписание)?';
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        const loader = document.getElementById('loader');
+        if (loader) loader.classList.remove('hidden');
+
+        // 1. УДАЛЯЕМ ВСЕ СВЯЗИ ПО ОЧЕРЕДИ
+        // Мы используем отдельные блоки, чтобы если одной таблицы нет, код не прерывался
+        
+        // Удаляем домашние задания (Homework) - именно здесь была ошибка!
+        await _supabase.from('homework').delete().eq('student_id', id);
+        
+        // Удаляем из расписания
+        await _supabase.from('schedule').delete().eq('student_id', id);
+        await _supabase.from('schedule').delete().eq('teacher_id', id);
+
+        // Удаляем из посещаемости
+        await _supabase.from('attendance').delete().eq('student_id', id);
+        
+        // Удаляем результаты тестов 
+        // Если была ошибка 400, пробуем оба варианта названия колонки:
+        await _supabase.from('test_results').delete().eq('student_id', id);
+        await _supabase.from('test_results').delete().eq('user_id', id);
+
+        // 2. УДАЛЯЕМ САМ ПРОФИЛЬ (теперь конфликтов быть не должно)
+        const { error: profileError } = await _supabase
+            .from('profiles')
+            .delete()
+            .eq('id', id);
+
+        if (profileError) throw profileError;
+
+        const successMsg = 
+            currentLang === 'az' ? 'Uğurla silindi' : 
+            currentLang === 'en' ? 'Deleted successfully' : 
+            'Успешно удалено';
+        
+        alert(successMsg);
+        await loadData(); 
+
+    } catch (err) {
+        console.error('Детальная ошибка:', err);
+        alert('Ошибка при удалении. Проверьте консоль (F12). Текст: ' + err.message);
+    } finally {
+        const loader = document.getElementById('loader');
+        if (loader) loader.classList.add('hidden');
+    }
+}
         async function saveLink() {
             const t = document.getElementById('link_teacher').value;
             const s = document.getElementById('link_student').value;
@@ -701,6 +779,58 @@ async function toggleDemoPermission(teacherId, currentStatus) {
         
     if (!error) alert("Доступ изменен!");
 }
+
+        // Функции для управления модальными окнами
+        function openModal() {
+            document.getElementById('userModal').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+        function openLinkModal() {
+            // Заполняем списки учителей и учеников
+            const teachers = usersArr.filter(u => u.role === 'teacher');
+            const students = usersArr.filter(u => u.role === 'student');
+            
+            document.getElementById('link_teacher').innerHTML = teachers.map(t => 
+                `<option value="${t.id}">${t.full_name}</option>`
+            ).join('');
+            
+            document.getElementById('link_student').innerHTML = students.map(s => 
+                `<option value="${s.id}">${s.full_name}</option>`
+            ).join('');
+            
+            document.getElementById('linkModal').classList.add('active');
+        }
+        function closeLinkModal() {
+            document.getElementById('linkModal').classList.remove('active');
+        }
+        
+        // Функция для удаления связи
+        async function unlinkPair(scheduleId) {
+            if(!confirm('Удалить эту связь?')) return;
+            await _supabase.from('schedule').delete().eq('id', scheduleId);
+            loadData();
+        }
+        
+        // Функция для управления меню на мобильных
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+        
+        // Закрываем меню при клике на пункт меню
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 768) {
+                        toggleMenu();
+                    }
+                });
+            });
+        });
 
         window.onload = loadData;
 // Добавьте это в самый низ скрипта admin.html
