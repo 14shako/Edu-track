@@ -110,7 +110,10 @@
         </nav>
         
 <!-- language selector removed (English-only) -->
-        <button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors"><i class="fa-solid fa-power-off mr-2"></i> <span class="hidden md:inline" data-i18n="logout">Выйти</span></button>
+<button onclick="logout()" class="p-3 text-red-400 font-bold mt-auto hover:text-red-300 transition-colors">
+    <i class="fa-solid fa-power-off mr-2"></i> 
+    <span class="hidden md:inline">Logout</span>
+</button>
     </aside>
 
     <main class="flex-1 ml-0 md:ml-64 p-4 md:p-10 transition-all">
@@ -249,7 +252,7 @@
                         <th class="pb-6 pl-12">Student</th>
                         <th class="pb-6">Number</th>
                         <th class="pb-6">Date</th>
-                        <th class="pb-6 text-right pr-12">Действие</th>
+                        <th class="pb-6 text-right pr-12">Action</th>
                     </tr>
                 </thead>
                 <tbody id="home-demo-requests-table">
@@ -274,7 +277,7 @@
             <button onclick="tab('pr'); toggleMobileMenu();" class="w-full text-left p-4 rounded-2xl font-bold transition-all flex items-center gap-2"><i class="fa-solid fa-user"></i> <span>Профиль</span></button>
         </nav>
         <div class="mt-auto">
-            <button onclick="logout()" class="w-full mt-6 p-3 bg-red-500 rounded text-white font-bold"><i class="fa-solid fa-power-off mr-2"></i> Выйти</button>
+            <button onclick="logout()" class="w-full mt-6 p-3 bg-red-500 rounded text-white font-bold"><i class="fa-solid fa-power-off mr-2"></i> Leave</button>
         </div>
     </div>
 
